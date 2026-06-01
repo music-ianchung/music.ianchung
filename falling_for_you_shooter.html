@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -40,10 +39,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#050818;font-family:
 .wishStar{font-size:26px;animation:wishSpin 5s linear infinite}
 @keyframes wishSpin{from{filter:hue-rotate(0)}to{filter:hue-rotate(360deg)}}
 .wishLabel{font-family:Georgia,serif;font-style:italic;font-size:14px;color:rgba(220,210,255,.82);text-align:center;line-height:1.65}
-.wishLabel span{font-size:9px;display:block;font-style:normal;color:rgba(200,190,255,.3);letter-spacing:.22em;margin-top:6px;font-family:‘Courier New’,monospace;text-transform:uppercase}
+.wishLabel span{font-size:9px;display:block;font-style:normal;color:rgba(200,190,255,.3);letter-spacing:.22em;margin-top:6px;font-family:'Courier New',monospace;text-transform:uppercase}
 #wishInput{width:100%;background:transparent;border:none;border-bottom:1px solid rgba(200,180,255,.22);color:#e8e2d4;font-family:Georgia,serif;font-style:italic;font-size:18px;padding:10px 4px;text-align:center;outline:none;-webkit-user-select:text!important;user-select:text!important;caret-color:rgba(200,180,255,.6)}
 #wishInput::placeholder{color:rgba(200,180,255,.2);font-style:italic}
-.wishSend{background:transparent;border:1px solid rgba(200,180,255,.22);color:rgba(200,180,255,.62);padding:12px 32px;letter-spacing:.22em;font-size:10px;font-family:‘Courier New’,monospace;cursor:pointer;text-transform:uppercase;-webkit-appearance:none;border-radius:0;min-height:46px}
+.wishSend{background:transparent;border:1px solid rgba(200,180,255,.22);color:rgba(200,180,255,.62);padding:12px 32px;letter-spacing:.22em;font-size:10px;font-family:'Courier New',monospace;cursor:pointer;text-transform:uppercase;-webkit-appearance:none;border-radius:0;min-height:46px}
 .wishSend:active{border-color:rgba(200,180,255,.7);color:rgba(220,210,255,.95)}
 
 #end{background:rgba(3,4,14,.9)}
@@ -58,7 +57,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#050818;font-family:
 .ptxt .dt{font-size:8px;color:#b0a898;letter-spacing:.18em;text-transform:uppercase;margin-top:5px}
 .brow{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;justify-content:center;transform:translateY(12px);opacity:0;transition:transform .5s cubic-bezier(.16,1,.3,1) .4s,opacity .5s .4s}
 .brow.show{transform:translateY(0);opacity:1}
-.btn{background:transparent;border:1px solid rgba(232,226,210,.28);color:rgba(232,226,210,.55);padding:12px 22px;letter-spacing:.16em;font-size:10px;font-family:‘Courier New’,monospace;cursor:pointer;text-transform:uppercase;-webkit-appearance:none;border-radius:0;min-height:46px}
+.btn{background:transparent;border:1px solid rgba(232,226,210,.28);color:rgba(232,226,210,.55);padding:12px 22px;letter-spacing:.16em;font-size:10px;font-family:'Courier New',monospace;cursor:pointer;text-transform:uppercase;-webkit-appearance:none;border-radius:0;min-height:46px}
 .btn.ig{background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);border:none;color:#fff;box-shadow:0 4px 20px rgba(253,29,29,.28)}
 .btn:active{opacity:.75}
 
@@ -76,7 +75,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#050818;font-family:
 @keyframes flashAnim{0%{opacity:1;background:rgba(230,220,255,.22)}100%{opacity:0}}
 @keyframes dmgAnim{0%{opacity:1}100%{opacity:0}}
 </style>
-
 </head>
 <body>
 <audio id="bgm" src="Falling_for_You.mp3" loop preload="auto"></audio>
@@ -897,81 +895,79 @@ function showIgOverlay(){
   var ov=document.createElement('div'); ov.id='igOverlay';
   ov.style.cssText='position:fixed;inset:0;z-index:80;background:rgba(3,4,14,.88);display:flex;align-items:center;justify-content:center;font-family:\'Courier New\',monospace';
   ov.innerHTML='<style>@keyframes fi{from{opacity:0}to{opacity:1}}#igB{animation:fi .4s ease;display:flex;flex-direction:column;align-items:center;gap:16px;max-width:min(300px,84vw);text-align:center}#igT{font-family:Georgia,serif;font-style:italic;font-size:16px;color:rgba(232,226,210,.88);line-height:1.6}#igS{font-size:9px;color:rgba(200,180,255,.38);letter-spacing:.18em;text-transform:uppercase;line-height:1.8}#igO{background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);border:none;color:#fff;padding:14px 0;letter-spacing:.2em;font-size:11px;font-family:\'Courier New\',monospace;cursor:pointer;text-transform:uppercase;width:100%;min-height:50px}#igD{background:transparent;border:1px solid rgba(232,226,210,.18);color:rgba(232,226,210,.36);padding:11px 0;letter-spacing:.2em;font-size:10px;font-family:\'Courier New\',monospace;cursor:pointer;text-transform:uppercase;width:100%;min-height:44px}</style><div id="igB"><div style="font-size:36px">✦</div><div id="igT">공유 시트에서<br>"이미지 저장" 탭 후<br>사진 앱에 저장됩니다</div><div id="igS">그 다음 인스타그램 스토리 추가<br>갤러리에서 이미지 선택</div><button id="igO">Open Instagram</button><button id="igD">Done</button></div>';
-
-document.body.appendChild(ov);
-document.getElementById(‘igO’).onclick=function(){
-window.location.href=‘instagram://story-camera’;
-setTimeout(function(){
-if(/iphone|ipad|ipod/i.test(navigator.userAgent))window.location.href=‘https://apps.apple.com/app/instagram/id389801252’;
-else window.open(‘https://play.google.com/store/apps/details?id=com.instagram.android’,’_blank’);
-},1500);
-};
-document.getElementById(‘igD’).onclick=function(){ov.remove();};
+  document.body.appendChild(ov);
+  document.getElementById('igO').onclick=function(){
+    window.location.href='instagram://story-camera';
+    setTimeout(function(){
+      if(/iphone|ipad|ipod/i.test(navigator.userAgent))window.location.href='https://apps.apple.com/app/instagram/id389801252';
+      else window.open('https://play.google.com/store/apps/details?id=com.instagram.android','_blank');
+    },1500);
+  };
+  document.getElementById('igD').onclick=function(){ov.remove();};
 }
 
 function doSave(){
-var snap=document.getElementById(‘snapImg’).src; if(!snap)return;
-var PW=640,PH=760,PAD=22,PHOTO_W=596,PHOTO_H=536;
-var pc=document.createElement(‘canvas’); pc.width=PW; pc.height=PH;
-var ct=pc.getContext(‘2d’);
-ct.fillStyle=’#f2ede4’; ct.fillRect(0,0,PW,PH);
-var img=new Image();
-img.onload=function(){
-var iw=img.naturalWidth,ih=img.naturalHeight;
-var scale=Math.max(PHOTO_W/iw,PHOTO_H/ih);
-var dw=iw*scale,dh=ih*scale;
-var dx=PAD+(PHOTO_W-dw)/2,dy=PAD+(PHOTO_H-dh)/2;
-ct.save(); ct.beginPath(); ct.rect(PAD,PAD,PHOTO_W,PHOTO_H); ct.clip();
-ct.drawImage(img,dx,dy,dw,dh); ct.restore();
-var stripY=PAD+PHOTO_H;
-ct.fillStyle=’#ede8df’; ct.fillRect(0,stripY,PW,PH-stripY);
-ct.fillStyle=’#d8d2c8’; ct.fillRect(PAD,stripY,PHOTO_W,1);
-ct.textAlign=‘center’;
-ct.fillStyle=’#1a1510’; ct.font=‘italic 26px Georgia,serif’; ct.fillText(‘Falling for You’,PW/2,stripY+52);
-ct.fillStyle=’#888’; ct.font=“13px ‘Courier New’,monospace”; ct.fillText(‘IAN CHUNG x MARTELLO’,PW/2,stripY+82);
-ct.fillStyle=’#bbb’; ct.font=“11px ‘Courier New’,monospace”;
-var meta=lastWishText?‘✦ “’+lastWishText+’”’:(score.toLocaleString()+’ pts · wave ‘+wave);
-ct.fillText(meta.length>42?meta.slice(0,42)+’…’:meta,PW/2,stripY+100);
-ct.fillStyle=’#c0b0a0’; ct.font=“10px ‘Courier New’,monospace”;
-ct.fillText(‘OUT ON JUNE 5, 2026’,PW/2,stripY+122);
-pc.toBlob(function(blob){
-var file=new File([blob],‘falling_for_you.jpg’,{type:‘image/jpeg’});
-if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file]});}
-else{var url=URL.createObjectURL(blob),a=document.createElement(‘a’);a.href=url;a.download=‘falling_for_you.jpg’;a.click();setTimeout(function(){URL.revokeObjectURL(url);},1000);}
-},‘image/jpeg’,.95);
-};
-img.src=snap;
+  var snap=document.getElementById('snapImg').src; if(!snap)return;
+  var PW=640,PH=760,PAD=22,PHOTO_W=596,PHOTO_H=536;
+  var pc=document.createElement('canvas'); pc.width=PW; pc.height=PH;
+  var ct=pc.getContext('2d');
+  ct.fillStyle='#f2ede4'; ct.fillRect(0,0,PW,PH);
+  var img=new Image();
+  img.onload=function(){
+    var iw=img.naturalWidth,ih=img.naturalHeight;
+    var scale=Math.max(PHOTO_W/iw,PHOTO_H/ih);
+    var dw=iw*scale,dh=ih*scale;
+    var dx=PAD+(PHOTO_W-dw)/2,dy=PAD+(PHOTO_H-dh)/2;
+    ct.save(); ct.beginPath(); ct.rect(PAD,PAD,PHOTO_W,PHOTO_H); ct.clip();
+    ct.drawImage(img,dx,dy,dw,dh); ct.restore();
+    var stripY=PAD+PHOTO_H;
+    ct.fillStyle='#ede8df'; ct.fillRect(0,stripY,PW,PH-stripY);
+    ct.fillStyle='#d8d2c8'; ct.fillRect(PAD,stripY,PHOTO_W,1);
+    ct.textAlign='center';
+    ct.fillStyle='#1a1510'; ct.font='italic 26px Georgia,serif'; ct.fillText('Falling for You',PW/2,stripY+52);
+    ct.fillStyle='#888'; ct.font="13px 'Courier New',monospace"; ct.fillText('IAN CHUNG x MARTELLO',PW/2,stripY+82);
+    ct.fillStyle='#bbb'; ct.font="11px 'Courier New',monospace";
+    var meta=lastWishText?'✦ "'+lastWishText+'"':(score.toLocaleString()+' pts · wave '+wave);
+    ct.fillText(meta.length>42?meta.slice(0,42)+'...':meta,PW/2,stripY+100);
+    ct.fillStyle='#c0b0a0'; ct.font="10px 'Courier New',monospace";
+    ct.fillText('OUT ON JUNE 5, 2026',PW/2,stripY+122);
+    pc.toBlob(function(blob){
+      var file=new File([blob],'falling_for_you.jpg',{type:'image/jpeg'});
+      if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file]});}
+      else{var url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='falling_for_you.jpg';a.click();setTimeout(function(){URL.revokeObjectURL(url);},1000);}
+    },'image/jpeg',.95);
+  };
+  img.src=snap;
 }
 
 // EVENTS
 var lastT=0;
 function bindBtn(id,fn){
-var el=document.getElementById(id); if(!el)return;
-el.addEventListener(‘touchend’,function(e){e.preventDefault();e.stopPropagation();lastT=Date.now();fn();},{passive:false});
-el.addEventListener(‘click’,function(e){if(Date.now()-lastT<400)return;fn();});
+  var el=document.getElementById(id); if(!el)return;
+  el.addEventListener('touchend',function(e){e.preventDefault();e.stopPropagation();lastT=Date.now();fn();},{passive:false});
+  el.addEventListener('click',function(e){if(Date.now()-lastT<400)return;fn();});
 }
-bindBtn(‘beginBtn’,startGame);
-bindBtn(‘snapBtn’,midGameSnap);
-bindBtn(‘saveBtn’,doSave);
-bindBtn(‘igBtn’,shareToInstagramStory);
-bindBtn(‘againBtn’,restart);
-bindBtn(‘wishSendBtn’,function(){closeWishModal(document.getElementById(‘wishInput’).value);});
-document.getElementById(‘wishInput’).addEventListener(‘keydown’,function(e){if(e.key===‘Enter’){e.preventDefault();closeWishModal(e.target.value);}});
+bindBtn('beginBtn',startGame);
+bindBtn('snapBtn',midGameSnap);
+bindBtn('saveBtn',doSave);
+bindBtn('igBtn',shareToInstagramStory);
+bindBtn('againBtn',restart);
+bindBtn('wishSendBtn',function(){closeWishModal(document.getElementById('wishInput').value);});
+document.getElementById('wishInput').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();closeWishModal(e.target.value);}});
 
-window.addEventListener(‘mousemove’,function(e){if(phase!==‘playing’)return;player.tx=e.clientX;player.ty=Math.max(H*.45,Math.min(H*.93,e.clientY));});
-window.addEventListener(‘mousedown’,function(e){if(phase!==‘playing’)return;if(e.target.tagName===‘BUTTON’||e.target.id===‘wishInput’)return;shooting=true;tryShoot();});
-window.addEventListener(‘mouseup’,function(){shooting=false;});
+window.addEventListener('mousemove',function(e){if(phase!=='playing')return;player.tx=e.clientX;player.ty=Math.max(H*.45,Math.min(H*.93,e.clientY));});
+window.addEventListener('mousedown',function(e){if(phase!=='playing')return;if(e.target.tagName==='BUTTON'||e.target.id==='wishInput')return;shooting=true;tryShoot();});
+window.addEventListener('mouseup',function(){shooting=false;});
 
-function handleTouch(e){if(phase!==‘playing’)return;var t=e.touches[0];if(!t)return;player.tx=t.clientX;player.ty=Math.max(H*.45,Math.min(H*.93,t.clientY));}
-document.addEventListener(‘touchstart’,function(e){if(phase!==‘playing’)return;if(e.target.tagName===‘BUTTON’||e.target.id===‘wishInput’)return;lastT=Date.now();shooting=true;handleTouch(e);tryShoot();},{passive:true});
-document.addEventListener(‘touchmove’,function(e){if(phase!==‘playing’)return;handleTouch(e);},{passive:true});
-document.addEventListener(‘touchend’,function(e){if(e.target.tagName===‘BUTTON’||e.target.id===‘wishInput’)return;shooting=false;});
+function handleTouch(e){if(phase!=='playing')return;var t=e.touches[0];if(!t)return;player.tx=t.clientX;player.ty=Math.max(H*.45,Math.min(H*.93,t.clientY));}
+document.addEventListener('touchstart',function(e){if(phase!=='playing')return;if(e.target.tagName==='BUTTON'||e.target.id==='wishInput')return;lastT=Date.now();shooting=true;handleTouch(e);tryShoot();},{passive:true});
+document.addEventListener('touchmove',function(e){if(phase!=='playing')return;handleTouch(e);},{passive:true});
+document.addEventListener('touchend',function(e){if(e.target.tagName==='BUTTON'||e.target.id==='wishInput')return;shooting=false;});
 
-setInterval(function(){if(shooting&&phase===‘playing’)tryShoot();},SHOOT_CD);
-window.addEventListener(‘resize’,resize);
+setInterval(function(){if(shooting&&phase==='playing')tryShoot();},SHOOT_CD);
+window.addEventListener('resize',resize);
 resize();
 raf=requestAnimationFrame(draw);
 </script>
-
 </body>
 </html>
