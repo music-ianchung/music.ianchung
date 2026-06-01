@@ -119,6 +119,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:#050818;font-family:
 @keyframes lyricFloat{0%{opacity:0;transform:translate(-50%,-45%)}20%{opacity:1;transform:translate(-50%,-50%)}75%{opacity:1}100%{opacity:0;transform:translate(-50%,-64%)}}
 @keyframes flashAnim{0%{opacity:1;background:rgba(230,220,255,.22)}100%{opacity:0}}
 @keyframes dmgAnim{0%{opacity:1}100%{opacity:0}}
+#snapBtn:active{
+  background:rgba(180,150,255,.18)!important;
+  border-color:rgba(200,180,255,.55)!important;
+  color:rgba(220,200,255,.9)!important;
+  box-shadow:0 0 22px rgba(180,150,255,.35)!important;
+  transform:scale(.92);
+}
 </style>
 </head>
 <body>
@@ -143,17 +150,39 @@ html,body{width:100%;height:100%;overflow:hidden;background:#050818;font-family:
   <div id="waveEl">wave 1</div>
   <div id="comboEl"></div>
   <div id="lyricEl"></div>
-  <button id="snapBtn" style="
-    position:fixed;top:16px;right:16px;
-    background:transparent;
-    border:1px solid rgba(232,226,210,.22);
-    color:rgba(232,226,210,.45);
-    width:42px;height:42px;border-radius:50%;
-    font-size:16px;cursor:pointer;
-    display:flex;align-items:center;justify-content:center;
-    -webkit-appearance:none;z-index:10;
-    transition:all .25s;letter-spacing:0">📷</button>
   <div id="hpBar"><div id="hpFill"></div></div>
+  <!-- energy bar -->
+  <div id="energyBar" style="position:fixed;bottom:5px;left:0;right:0;height:2px;background:rgba(200,180,255,.07)">
+    <div id="energyFill" style="height:100%;width:0%;background:rgba(200,170,255,.55);transition:width .3s ease"></div>
+  </div>
+</div>
+
+<!-- snap button -->
+<button id="snapBtn" style="
+  position:fixed;top:28px;right:18px;
+  background:rgba(6,5,20,.65);
+  border:1px solid rgba(200,180,255,.2);
+  color:rgba(185,165,255,.6);
+  width:44px;height:44px;border-radius:10px;
+  cursor:pointer;
+  display:none;align-items:center;justify-content:center;
+  -webkit-appearance:none;z-index:200;
+  transition:all .2s;
+  box-shadow:0 0 12px rgba(160,130,255,.08)">
+  <svg width="22" height="18" viewBox="0 0 22 18" fill="none"
+    stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+    <!-- camera body -->
+    <rect x="1" y="4" width="20" height="13" rx="2"/>
+    <!-- lens -->
+    <circle cx="11" cy="11" r="3.5"/>
+    <!-- viewfinder bump -->
+    <path d="M7 4 L8.5 1.5 L13.5 1.5 L15 4"/>
+    <!-- inner lens ring -->
+    <circle cx="11" cy="11" r="1.5" stroke-opacity=".4"/>
+    <!-- flash dot -->
+    <circle cx="17.5" cy="7.5" r=".8" fill="currentColor" stroke="none" opacity=".5"/>
+  </svg>
+</button>
 </div>
 
 <div id="wishModal">
@@ -336,18 +365,24 @@ const Snd = {
 };
 
 // ─── CONFIG ──────────────────────────────────────
-const MAX_HP = 5, SHOOT_CD = 130;
+const MAX_HP = 5, SHOOT_CD = 130, MAX_ENERGY = 3;
 const LYRICS = ["falling for you","for real, for real","too good to be real","don't wake me up","better than dreams","right here","found my way"];
 const METEOR_HUES = { common: 260, cool: 200, warm: 340, rare: 270 };
+const POWER_ITEMS = [
+  { label: 'Falling for You', energy: 3, hue: 310, rate: .012 },
+  { label: 'Ian Chung',       energy: 1, hue: 190, rate: .025 },
+  { label: 'Martello',        energy: 1, hue: 50,  rate: .025 },
+];
 
 // ─── STATE ───────────────────────────────────────
 let phase = 'intro';
 let player = { x: 0, y: 0, tx: 0, ty: 0 };
-let bullets = [], meteors = [], particles = [], rings = [], bgStars = [];
+let bullets = [], meteors = [], particles = [], rings = [], bgStars = [], powerItems = [];
 let hp = MAX_HP, score = 0, combo = 0, lastHit = 0;
+let energy = 0; // 0–3
 let wave = 1, waveTimer = 0, waveKills = 0, waveTarget = 8;
 let shooting = false, lastShot = 0;
-let running = false, raf = null;
+let running = false, raf = null, ticker = null;
 let lastWishText = '', lyricIdx = 0;
 let screenShake = 0;
 
@@ -401,6 +436,16 @@ function mkParticles(x, y, n, hue, big) {
 
 function mkRing(x, y, hue) {
   return { x, y, r: 0, maxR: rnd(28, 52), hue, t: 0 };
+}
+function mkPowerItem(idx) {
+  const cfg = POWER_ITEMS[idx];
+  return {
+    x: rnd(W * .1, W * .9), y: -40,
+    vy: rnd(.5, .9), vx: rnd(-.3, .3),
+    label: cfg.label, energy: cfg.energy,
+    hue: cfg.hue, ph: rnd(0, TAU),
+    r: 22, age: 0
+  };
 }
 
 // ─── SHOOT ───────────────────────────────────────
@@ -480,6 +525,33 @@ function update() {
     if (r.r >= r.maxR) rings.splice(i, 1);
   }
 
+  // power items — spawn randomly
+  if (running && waveTimer % 380 === 0) {
+    powerItems.push(mkPowerItem(Math.floor(Math.random() * POWER_ITEMS.length)));
+  }
+
+  // power items update + bullet collision
+  for (let i = powerItems.length - 1; i >= 0; i--) {
+    const p = powerItems[i];
+    p.age++; p.ph += .04;
+    p.x += p.vx; p.y += p.vy;
+    if (p.y > H + 50) { powerItems.splice(i, 1); continue; }
+
+    // bullet collision
+    let caught = false;
+    for (let j = bullets.length - 1; j >= 0; j--) {
+      if (!bullets[j].alive) continue;
+      if (Math.hypot(bullets[j].x - p.x, bullets[j].y - p.y) < p.r + 6) {
+        bullets[j].alive = false;
+        caught = true; break;
+      }
+    }
+    if (caught) {
+      catchPowerItem(p);
+      powerItems.splice(i, 1);
+    }
+  }
+
   // wave spawn — more meteors, faster
   waveTimer++;
   const spawnRate = Math.max(18, 44 - wave * 3);
@@ -518,6 +590,54 @@ function hitMeteor(m, idx) {
   else { Snd.hit(big); if (combo >= 3) { screenShake = 4; showCombo(combo); } }
 
   updateScore();
+}
+
+function catchPowerItem(p) {
+  energy = Math.min(MAX_ENERGY, energy + p.energy);
+  score += 200;
+  particles.push(...mkParticles(p.x, p.y, 16, p.hue, true));
+  rings.push(mkRing(p.x, p.y, p.hue));
+  showLyric(`✦ ${p.label}`);
+  Snd.hit(true);
+  screenShake = 5;
+  updateScore();
+  updateEnergy();
+  if (energy >= MAX_ENERGY) energyBlast();
+}
+
+function energyBlast() {
+  energy = 0; updateEnergy();
+  // destroy all meteors on screen
+  meteors.forEach(m => {
+    particles.push(...mkParticles(m.x, m.y, 14, m.hue, true));
+    rings.push(mkRing(m.x, m.y, m.hue));
+    score += 50; waveKills++;
+  });
+  meteors = [];
+  screenShake = 14;
+  Snd.rare();
+  // rainbow flash
+  const rbf = document.getElementById('rbFlash');
+  if (!rbf) {
+    const d = document.createElement('div');
+    d.id = 'rbFlash';
+    d.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:19;background:radial-gradient(circle,rgba(200,160,255,.3),rgba(150,200,255,.15),transparent 70%);opacity:0;animation:rbAnim 1.2s ease-out forwards';
+    document.body.appendChild(d);
+    setTimeout(() => d.remove(), 1300);
+  }
+  showLyric('"falling for you"');
+  updateScore();
+}
+
+function updateEnergy() {
+  const pct = (energy / MAX_ENERGY) * 100;
+  const ef = document.getElementById('energyFill');
+  if (ef) {
+    ef.style.width = `${pct}%`;
+    ef.style.background = energy >= MAX_ENERGY
+      ? 'rgba(220,170,255,.9)'
+      : 'rgba(200,170,255,.55)';
+  }
 }
 
 function takeDamage() {
@@ -594,6 +714,46 @@ function draw(ts) {
     X.globalAlpha = .5;
     X.fillRect(b.x - 3, b.y - 16, 6, 4);
     X.globalAlpha = 1;
+  });
+
+  // power items — floating name tags
+  powerItems.forEach(p => {
+    X.save(); X.translate(p.x, p.y);
+    const pulse = .9 + Math.sin(p.ph) * .1;
+
+    // outer glow ring
+    X.globalAlpha = .22 + Math.sin(p.ph) * .08;
+    X.strokeStyle = `hsl(${p.hue},60%,80%)`;
+    X.lineWidth = 1;
+    X.beginPath(); X.arc(0, 0, p.r * pulse * 1.35, 0, TAU); X.stroke();
+
+    // inner orb
+    X.globalAlpha = .55 + Math.sin(p.ph) * .15;
+    X.strokeStyle = `hsl(${p.hue},70%,82%)`;
+    X.lineWidth = 1.2;
+    X.beginPath(); X.arc(0, 0, p.r * pulse, 0, TAU); X.stroke();
+
+    // center fill
+    X.globalAlpha = .18;
+    X.fillStyle = `hsl(${p.hue},60%,80%)`;
+    X.beginPath(); X.arc(0, 0, p.r * pulse, 0, TAU); X.fill();
+
+    // ✦ symbol center
+    X.globalAlpha = .7 + Math.sin(p.ph) * .2;
+    X.fillStyle = `hsl(${p.hue},30%,92%)`;
+    X.font = '11px serif'; X.textAlign = 'center'; X.textBaseline = 'middle';
+    X.fillText('✦', 0, 0);
+
+    // label below
+    X.globalAlpha = .65;
+    X.fillStyle = `hsl(${p.hue},40%,85%)`;
+    X.font = `9px 'Courier New',monospace`;
+    X.letterSpacing = '.08em';
+    X.fillText(p.label.toUpperCase(), 0, p.r + 14);
+    X.textBaseline = 'alphabetic';
+
+    X.globalAlpha = 1;
+    X.restore();
   });
 
   // meteors — use pre-rendered sprite, add trail with lines
@@ -786,8 +946,8 @@ function closeWishModal(txt) {
 // ─── GAME FLOW ───────────────────────────────────
 function startGame() {
   Snd.init();
-  bullets = []; meteors = []; particles = []; rings = [];
-  hp = MAX_HP; score = 0; combo = 0; lastHit = 0;
+  bullets = []; meteors = []; particles = []; rings = []; powerItems = [];
+  hp = MAX_HP; score = 0; combo = 0; lastHit = 0; energy = 0;
   wave = 1; waveTimer = 0; waveKills = 0; waveTarget = 8;
   screenShake = 0; lastWishText = ''; lyricIdx = 0; shooting = false;
   player.x = player.tx = W / 2;
@@ -798,6 +958,7 @@ function startGame() {
   updateScore();
   running = true; phase = 'playing';
   showScreen('hud');
+  document.getElementById('snapBtn').style.display = 'flex';
   const bgm = document.getElementById('bgm');
   bgm.currentTime = 0;
   bgm.volume = 0.15;
@@ -807,6 +968,7 @@ function startGame() {
 
 function endGame() {
   running = false; phase = 'ended'; Snd.fadeOut();
+  document.getElementById('snapBtn').style.display = 'none';
   const bgm = document.getElementById('bgm');
   bgm.pause(); bgm.currentTime = 0;
   meteors = []; bullets = [];
@@ -820,34 +982,106 @@ function doShutter() {
 
   requestAnimationFrame(() => setTimeout(() => {
 
-    // ── 캡처 전 신비로운 효과 덧씌우기 ──────────────
-    // 1. 전체 어두운 보라빛 오버레이
+    // ── 캡처 전 효과 ─────────────────────────────────
     X.save();
-    X.fillStyle = 'rgba(8,5,28,.38)';
+    const now2 = Date.now() * .001;
+
+    // 1. 은은한 다크 오버레이
+    X.fillStyle = 'rgba(4,3,18,.32)';
     X.fillRect(0, 0, W, H);
 
-    // 2. 중앙 발광 — 빛이 안에서 퍼지는 느낌
-    const cx = W / 2, cy = H / 2;
-    const glow = X.createRadialGradient(cx, cy * .7, 0, cx, cy * .7, W * .65);
-    glow.addColorStop(0,  'rgba(180,150,255,.18)');
-    glow.addColorStop(.5, 'rgba(120,90,200,.08)');
-    glow.addColorStop(1,  'rgba(0,0,0,0)');
-    X.fillStyle = glow;
-    X.fillRect(0, 0, W, H);
+    // 2. 오로라 — 하늘 전체에 퍼지는 빛의 띠
+    const auroraColors = [
+      [260, .18],   // 보라
+      [190, .15],   // 청록
+      [300, .13],   // 핑크보라
+    ];
+    auroraColors.forEach(([hue, alpha], ai) => {
+      for (let band = 0; band < 4; band++) {
+        const yBase = H * (.05 + ai * .15 + band * .1);
+        const ht    = H * (.14 + band * .04);
+        const xOff  = Math.sin(now2 * .3 + ai * 1.2 + band * 2.1) * W * .22;
+        const ag = X.createLinearGradient(0, yBase, 0, yBase + ht);
+        ag.addColorStop(0,   'rgba(0,0,0,0)');
+        ag.addColorStop(.4,  `hsla(${hue},80%,70%,${alpha})`);
+        ag.addColorStop(.65, `hsla(${hue + 25},75%,75%,${alpha * .6})`);
+        ag.addColorStop(1,   'rgba(0,0,0,0)');
+        X.save();
+        X.translate(xOff, 0);
+        X.beginPath();
+        X.moveTo(-W * .1, yBase);
+        X.bezierCurveTo(
+          W * .25, yBase + Math.sin(now2 * .5 + ai) * 24,
+          W * .75, yBase - Math.sin(now2 * .4 + ai + 1) * 20,
+          W * 1.1,  yBase + Math.sin(now2 * .35 + ai + 2) * 16
+        );
+        X.lineTo(W * 1.1, yBase + ht);
+        X.bezierCurveTo(
+          W * .75, yBase + ht - Math.sin(now2 * .4) * 12,
+          W * .25, yBase + ht + Math.sin(now2 * .5) * 16,
+          -W * .1,  yBase + ht
+        );
+        X.closePath();
+        X.fillStyle = ag; X.fill();
+        X.restore();
+      }
+    });
 
-    // 3. 흩어진 빛 입자 — 별처럼 보이는 작은 점들
-    for (let i = 0; i < 60; i++) {
-      const px = rnd(0, W), py = rnd(0, H * .85);
-      const pr = rnd(.3, 1.6);
-      const pa = rnd(.15, .7);
-      const ph = rnd(220, 310);
+    // 3. 능선 실루엣 — 여러 겹의 산 레이어
+    const ridgeY = gY;
+    // 뒷 능선 (더 밝게, 더 높이)
+    X.globalAlpha = .22;
+    X.fillStyle = 'rgba(30,20,60,1)';
+    X.beginPath(); X.moveTo(0, H);
+    let rx = 0;
+    while (rx <= W) {
+      const rh = ridgeY * .72 + Math.sin(rx * .008 + 1.2) * H * .07
+                + Math.sin(rx * .02 + .4) * H * .035
+                + Math.sin(rx * .005 + 2.8) * H * .06;
+      X.lineTo(rx, rh);
+      rx += 8;
+    }
+    X.lineTo(W, H); X.closePath(); X.fill();
+
+    // 앞 능선 (더 어둡게, 더 낮게)
+    X.globalAlpha = .55;
+    X.fillStyle = 'rgba(6,4,16,1)';
+    X.beginPath(); X.moveTo(0, H);
+    rx = 0;
+    while (rx <= W) {
+      const rh = ridgeY * .86 + Math.sin(rx * .011 + .7) * H * .04
+                + Math.sin(rx * .025 + 1.9) * H * .025
+                + Math.sin(rx * .006 + 3.5) * H * .05;
+      X.lineTo(rx, rh);
+      rx += 6;
+    }
+    X.lineTo(W, H); X.closePath(); X.fill();
+
+    // 가장 앞 능선 — 거의 검정
+    X.globalAlpha = .85;
+    X.fillStyle = 'rgba(3,2,10,1)';
+    X.beginPath(); X.moveTo(0, H);
+    rx = 0;
+    while (rx <= W) {
+      const rh = ridgeY * .95 + Math.sin(rx * .014 + .3) * H * .025
+                + Math.sin(rx * .032 + 2.1) * H * .015;
+      X.lineTo(rx, rh);
+      rx += 5;
+    }
+    X.lineTo(W, H); X.closePath(); X.fill();
+    X.globalAlpha = 1;
+
+    // 4. 흩어진 빛 입자
+    for (let i = 0; i < 50; i++) {
+      const px = rnd(0, W), py = rnd(0, H * .82);
+      const pr = rnd(.2, 1.5), pa = rnd(.1, .55);
+      const ph = rnd(210, 300);
       X.globalAlpha = pa;
-      X.fillStyle = `hsl(${ph},60%,88%)`;
+      X.fillStyle = `hsl(${ph},55%,88%)`;
       X.beginPath(); X.arc(px, py, pr, 0, TAU); X.fill();
-      // 십자 스트릭
-      if (pr > 1.1) {
-        X.globalAlpha = pa * .4;
-        X.strokeStyle = `hsl(${ph},50%,90%)`;
+      if (pr > 1) {
+        X.globalAlpha = pa * .35;
+        X.strokeStyle = `hsl(${ph},45%,90%)`;
         X.lineWidth = .5;
         X.beginPath(); X.moveTo(px - pr*3, py); X.lineTo(px + pr*3, py); X.stroke();
         X.beginPath(); X.moveTo(px, py - pr*3); X.lineTo(px, py + pr*3); X.stroke();
@@ -855,40 +1089,34 @@ function doShutter() {
     }
     X.globalAlpha = 1;
 
-    // 4. 소원 텍스트가 있으면 하늘에 크게 — 폴라로이드에 찍히게
+    // 5. 소원 텍스트
     if (lastWishText) {
       const fontSize = Math.min(W / 18, 32);
       X.font = `italic ${fontSize}px Georgia,serif`;
       X.textAlign = 'center';
-      X.shadowColor = 'rgba(200,170,255,.9)';
-      X.shadowBlur = 22;
+      X.shadowColor = 'rgba(180,150,255,.85)'; X.shadowBlur = 24;
       X.fillStyle = 'rgba(225,215,255,.72)';
-      X.fillText(`"${lastWishText}"`, W/2, H * .28);
-      // 양쪽 ✦
+      X.fillText(`"${lastWishText}"`, W/2, H * .26);
       X.font = `${fontSize * .7}px serif`;
       const tw = X.measureText(`"${lastWishText}"`).width;
-      X.fillText('✦', W/2 - tw/2 - 18, H * .28);
-      X.fillText('✦', W/2 + tw/2 + 18, H * .28);
+      X.fillText('✦', W/2 - tw/2 - 18, H * .26);
+      X.fillText('✦', W/2 + tw/2 + 18, H * .26);
       X.shadowBlur = 0;
     }
 
-    // 5. 하단 곡선 비네트 — 영화 느낌
+    // 6. 비네트
     const vg = X.createLinearGradient(0, 0, 0, H);
-    vg.addColorStop(0,   'rgba(4,3,16,.45)');
-    vg.addColorStop(.15, 'rgba(4,3,16,0)');
-    vg.addColorStop(.85, 'rgba(4,3,16,0)');
-    vg.addColorStop(1,   'rgba(4,3,16,.55)');
-    X.fillStyle = vg;
-    X.fillRect(0, 0, W, H);
-
-    // 좌우 비네트
+    vg.addColorStop(0,   'rgba(4,3,16,.42)');
+    vg.addColorStop(.18, 'rgba(4,3,16,0)');
+    vg.addColorStop(.82, 'rgba(4,3,16,0)');
+    vg.addColorStop(1,   'rgba(4,3,16,.52)');
+    X.fillStyle = vg; X.fillRect(0, 0, W, H);
     const lg = X.createLinearGradient(0, 0, W, 0);
-    lg.addColorStop(0,   'rgba(4,3,16,.3)');
+    lg.addColorStop(0,   'rgba(4,3,16,.28)');
     lg.addColorStop(.12, 'rgba(4,3,16,0)');
     lg.addColorStop(.88, 'rgba(4,3,16,0)');
-    lg.addColorStop(1,   'rgba(4,3,16,.3)');
-    X.fillStyle = lg;
-    X.fillRect(0, 0, W, H);
+    lg.addColorStop(1,   'rgba(4,3,16,.28)');
+    X.fillStyle = lg; X.fillRect(0, 0, W, H);
 
     X.restore();
     // ── 효과 끝 ──────────────────────────────────────
@@ -913,14 +1141,36 @@ function midGameSnap() {
   // draw effects then capture
   requestAnimationFrame(() => setTimeout(() => {
     X.save();
-    X.fillStyle = 'rgba(8,5,28,.38)'; X.fillRect(0,0,W,H);
-    const glow2 = X.createRadialGradient(W/2,H*.5,0,W/2,H*.5,W*.6);
-    glow2.addColorStop(0,'rgba(180,150,255,.16)');glow2.addColorStop(1,'rgba(0,0,0,0)');
-    X.fillStyle=glow2; X.fillRect(0,0,W,H);
-    for(let i=0;i<50;i++){const px=rnd(0,W),py=rnd(0,H*.85),pr=rnd(.3,1.5),pa=rnd(.1,.6),ph=rnd(220,310);X.globalAlpha=pa;X.fillStyle=`hsl(${ph},60%,88%)`;X.beginPath();X.arc(px,py,pr,0,TAU);X.fill();}
+    const n2 = Date.now() * .001;
+    X.fillStyle = 'rgba(4,3,18,.32)'; X.fillRect(0,0,W,H);
+    // aurora
+    [[260,.055],[200,.048],[290,.04]].forEach(([hue,alpha],ai)=>{
+      for(let band=0;band<3;band++){
+        const yB=H*(.12+ai*.1+band*.06),ht=H*(.08+band*.03);
+        const xO=Math.sin(n2*.3+ai*1.2+band*2.1)*W*.18;
+        const ag=X.createLinearGradient(0,yB,0,yB+ht);
+        ag.addColorStop(0,'rgba(0,0,0,0)');
+        ag.addColorStop(.4,`hsla(${hue},70%,68%,${alpha})`);
+        ag.addColorStop(1,'rgba(0,0,0,0)');
+        X.save();X.translate(xO,0);
+        X.beginPath();X.moveTo(-W*.1,yB);
+        X.bezierCurveTo(W*.25,yB+Math.sin(n2*.5+ai)*18,W*.75,yB-Math.sin(n2*.4+ai+1)*14,W*1.1,yB+Math.sin(n2*.35+ai+2)*10);
+        X.lineTo(W*1.1,yB+ht);X.bezierCurveTo(W*.75,yB+ht-Math.sin(n2*.4)*8,W*.25,yB+ht+Math.sin(n2*.5)*12,-W*.1,yB+ht);
+        X.closePath();X.fillStyle=ag;X.fill();X.restore();
+      }
+    });
+    // ridges
+    [[.72,60,'rgba(30,20,60,1)',.22],[.86,30,'rgba(6,4,16,1)',.55],[.95,20,'rgba(3,2,10,1)',.85]].forEach(([yr,step,col,a])=>{
+      X.globalAlpha=a;X.fillStyle=col;X.beginPath();X.moveTo(0,H);
+      for(let rx2=0;rx2<=W;rx2+=step){const rh=gY*yr+Math.sin(rx2*.01+yr*5)*H*.04+Math.sin(rx2*.025+yr*2)*H*.02;X.lineTo(rx2,rh);}
+      X.lineTo(W,H);X.closePath();X.fill();
+    });
     X.globalAlpha=1;
-    if(lastWishText){const fs=Math.min(W/18,30);X.font=`italic ${fs}px Georgia,serif`;X.textAlign='center';X.fillStyle='rgba(220,210,255,.7)';X.shadowColor='rgba(180,150,255,.7)';X.shadowBlur=18;X.fillText(`"${lastWishText}"`,W/2,H*.28);X.shadowBlur=0;}
-    const vg2=X.createLinearGradient(0,0,0,H);vg2.addColorStop(0,'rgba(4,3,16,.4)');vg2.addColorStop(.15,'rgba(4,3,16,0)');vg2.addColorStop(.85,'rgba(4,3,16,0)');vg2.addColorStop(1,'rgba(4,3,16,.5)');X.fillStyle=vg2;X.fillRect(0,0,W,H);
+    // particles
+    for(let i=0;i<40;i++){const px2=rnd(0,W),py2=rnd(0,H*.8),pr2=rnd(.2,1.4),pa2=rnd(.1,.5),ph2=rnd(210,300);X.globalAlpha=pa2;X.fillStyle=`hsl(${ph2},55%,88%)`;X.beginPath();X.arc(px2,py2,pr2,0,TAU);X.fill();}
+    X.globalAlpha=1;
+    if(lastWishText){const fs2=Math.min(W/18,32);X.font=`italic ${fs2}px Georgia,serif`;X.textAlign='center';X.shadowColor='rgba(180,150,255,.85)';X.shadowBlur=24;X.fillStyle='rgba(225,215,255,.72)';X.fillText(`"${lastWishText}"`,W/2,H*.26);X.shadowBlur=0;}
+    const vg3=X.createLinearGradient(0,0,0,H);vg3.addColorStop(0,'rgba(4,3,16,.4)');vg3.addColorStop(.18,'rgba(4,3,16,0)');vg3.addColorStop(.82,'rgba(4,3,16,0)');vg3.addColorStop(1,'rgba(4,3,16,.5)');X.fillStyle=vg3;X.fillRect(0,0,W,H);
     X.restore();
     const snap = C.toDataURL('image/jpeg', .92);
     showPausedPolaroid(snap);
@@ -952,6 +1202,7 @@ function resumeGame() {
   document.getElementById('pol').classList.remove('show');
   document.getElementById('brow').classList.remove('show');
   document.getElementById('snapImg').classList.remove('dev');
+  document.getElementById('snapBtn').style.display = 'flex';
   phase = 'playing'; running = true;
   showScreen('hud');
   // restart countdown
@@ -1121,10 +1372,11 @@ function restart() {
   document.getElementById('pol').classList.remove('show');
   document.getElementById('brow').classList.remove('show');
   document.getElementById('snapImg').classList.remove('dev');
+  document.getElementById('snapBtn').style.display = 'none';
   const bgm = document.getElementById('bgm');
   bgm.pause(); bgm.currentTime = 0;
   phase = 'intro'; showScreen('intro');
-  bullets=[]; meteors=[]; particles=[]; rings=[]; running=false;
+  bullets=[]; meteors=[]; particles=[]; rings=[]; powerItems=[]; running=false;
 }
 
 // ─── EVENTS ──────────────────────────────────────
