@@ -135,7 +135,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#050818;font-family:
   <h1>Falling<br>for You</h1>
   <p class="sub">shoot the falling stars</p>
   <button id="beginBtn" class="gbtn">Begin</button>
-  <p class="hint">move to aim · tap to shoot · ✦ rare star grants a wish</p>
+  <p class="hint">drag to move · hold to shoot · ✦ rare star grants a wish</p>
 </div>
 
 <div id="hud" class="scr">
@@ -143,6 +143,16 @@ html,body{width:100%;height:100%;overflow:hidden;background:#050818;font-family:
   <div id="waveEl">wave 1</div>
   <div id="comboEl"></div>
   <div id="lyricEl"></div>
+  <button id="snapBtn" style="
+    position:fixed;top:16px;right:16px;
+    background:transparent;
+    border:1px solid rgba(232,226,210,.22);
+    color:rgba(232,226,210,.45);
+    width:42px;height:42px;border-radius:50%;
+    font-size:16px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    -webkit-appearance:none;z-index:10;
+    transition:all .25s;letter-spacing:0">📷</button>
   <div id="hpBar"><div id="hpFill"></div></div>
 </div>
 
@@ -167,6 +177,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#050818;font-family:
       <p class="ti">Falling for You</p>
       <p class="ar">Ian Chung × Martello</p>
       <p class="me" id="bmeta"></p>
+      <p style="font-size:8px;color:#b0a898;letter-spacing:.18em;text-transform:uppercase;margin-top:5px">Out on June 5, 2026</p>
     </div>
   </div>
   <div class="brow" id="brow">
@@ -883,8 +894,73 @@ function doShutter() {
     // ── 효과 끝 ──────────────────────────────────────
 
     const snap = C.toDataURL('image/jpeg', .92);
-    showPolaroid(snap);
+    // if paused mid-game, show resume option; else normal end screen
+    if (phase === 'paused') showPausedPolaroid(snap);
+    else showPolaroid(snap);
   }, 100));
+}
+
+// Mid-game: pause + snap
+function midGameSnap() {
+  if (phase !== 'playing') return;
+  running = false;
+  clearInterval(ticker);
+  shooting = false;
+  phase = 'paused';
+  Snd.shutter();
+  const fl = document.getElementById('flash');
+  fl.classList.add('go'); setTimeout(() => fl.classList.remove('go'), 500);
+  // draw effects then capture
+  requestAnimationFrame(() => setTimeout(() => {
+    X.save();
+    X.fillStyle = 'rgba(8,5,28,.38)'; X.fillRect(0,0,W,H);
+    const glow2 = X.createRadialGradient(W/2,H*.5,0,W/2,H*.5,W*.6);
+    glow2.addColorStop(0,'rgba(180,150,255,.16)');glow2.addColorStop(1,'rgba(0,0,0,0)');
+    X.fillStyle=glow2; X.fillRect(0,0,W,H);
+    for(let i=0;i<50;i++){const px=rnd(0,W),py=rnd(0,H*.85),pr=rnd(.3,1.5),pa=rnd(.1,.6),ph=rnd(220,310);X.globalAlpha=pa;X.fillStyle=`hsl(${ph},60%,88%)`;X.beginPath();X.arc(px,py,pr,0,TAU);X.fill();}
+    X.globalAlpha=1;
+    if(lastWishText){const fs=Math.min(W/18,30);X.font=`italic ${fs}px Georgia,serif`;X.textAlign='center';X.fillStyle='rgba(220,210,255,.7)';X.shadowColor='rgba(180,150,255,.7)';X.shadowBlur=18;X.fillText(`"${lastWishText}"`,W/2,H*.28);X.shadowBlur=0;}
+    const vg2=X.createLinearGradient(0,0,0,H);vg2.addColorStop(0,'rgba(4,3,16,.4)');vg2.addColorStop(.15,'rgba(4,3,16,0)');vg2.addColorStop(.85,'rgba(4,3,16,0)');vg2.addColorStop(1,'rgba(4,3,16,.5)');X.fillStyle=vg2;X.fillRect(0,0,W,H);
+    X.restore();
+    const snap = C.toDataURL('image/jpeg', .92);
+    showPausedPolaroid(snap);
+  }, 100));
+}
+
+function showPausedPolaroid(snap) {
+  const img = document.getElementById('snapImg');
+  img.src = snap; img.classList.remove('dev');
+  document.getElementById('bmeta').textContent =
+    lastWishText ? `✦ "${lastWishText}"` : `${score.toLocaleString()} pts · wave ${wave}`;
+  // swap Again → Resume
+  const ag = document.getElementById('againBtn');
+  ag.textContent = 'Resume'; ag.onclick = resumeGame;
+  showScreen('end');
+  const pol = document.getElementById('pol'), br = document.getElementById('brow');
+  pol.classList.remove('show'); br.classList.remove('show');
+  setTimeout(() => {
+    pol.classList.add('show');
+    setTimeout(() => img.classList.add('dev'), 280);
+    setTimeout(() => br.classList.add('show'), 430);
+  }, 80);
+}
+
+function resumeGame() {
+  // restore Again button
+  const ag = document.getElementById('againBtn');
+  ag.textContent = 'Again'; ag.onclick = restart;
+  document.getElementById('pol').classList.remove('show');
+  document.getElementById('brow').classList.remove('show');
+  document.getElementById('snapImg').classList.remove('dev');
+  phase = 'playing'; running = true;
+  showScreen('hud');
+  // restart countdown
+  ticker = setInterval(() => {
+    tLeft--; updateStats();
+    document.getElementById('tfill') && (document.getElementById('tfill').style.width = `${(tLeft/DURATION)*100}%`);
+    if (tLeft <= 0) { clearInterval(ticker); endGame(); }
+  }, 1000);
+  raf = requestAnimationFrame(loop);
 }
 
 function showPolaroid(snap) {
@@ -1020,8 +1096,12 @@ function doSave() {
     const meta = lastWishText
       ? `✦ "${lastWishText}"`
       : `${score.toLocaleString()} pts · wave ${wave}`;
-    // truncate if too long
-    ct.fillText(meta.length > 42 ? meta.slice(0,42)+'…' : meta, PW/2, stripY + 106);
+    ct.fillText(meta.length > 42 ? meta.slice(0,42)+'…' : meta, PW/2, stripY + 100);
+
+    ct.fillStyle = '#c0b0a0';
+    ct.font = "10px 'Courier New',monospace";
+    ct.letterSpacing = '0.12em';
+    ct.fillText('OUT ON JUNE 5, 2026', PW/2, stripY + 122);
 
     pc.toBlob(blob => {
       const file = new File([blob], 'falling_for_you.jpg', {type:'image/jpeg'});
@@ -1055,6 +1135,7 @@ function bindBtn(id, fn) {
   el.addEventListener('click', e => { if (Date.now()-lastT < 400) return; fn(); });
 }
 bindBtn('beginBtn', startGame);
+bindBtn('snapBtn', midGameSnap);
 bindBtn('saveBtn', doSave);
 bindBtn('igBtn', shareToInstagramStory);
 bindBtn('againBtn', restart);
@@ -1063,39 +1144,56 @@ document.getElementById('wishInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') { e.preventDefault(); closeWishModal(e.target.value); }
 });
 
-// player movement
+// ── CONTROLS ─────────────────────────────────────
+// PC: mousemove = aim, mousedown/up = shoot
+// Mobile: touchmove = aim + auto-fire, finger down = shooting
+
+// PC mouse
 window.addEventListener('mousemove', e => {
   if (phase !== 'playing') return;
   player.tx = e.clientX;
-  player.ty = Math.max(H * .5, Math.min(H * .93, e.clientY));
+  player.ty = Math.max(H * .45, Math.min(H * .93, e.clientY));
 });
-window.addEventListener('touchmove', e => {
-  if (phase !== 'playing') return;
-  e.preventDefault();
-  const t = e.touches[0];
-  player.tx = t.clientX;
-  player.ty = Math.max(H * .5, Math.min(H * .93, t.clientY));
-}, {passive:false});
-
-// shooting
 window.addEventListener('mousedown', e => {
   if (phase !== 'playing') return;
   if (e.target.tagName === 'BUTTON' || e.target.id === 'wishInput') return;
   shooting = true; tryShoot();
 });
-window.addEventListener('mouseup', () => shooting = false);
-window.addEventListener('touchstart', e => {
+window.addEventListener('mouseup', () => { shooting = false; });
+
+// Mobile touch — single handler does everything
+// touchstart: begin moving + shooting
+// touchmove:  keep moving + keep shooting
+// touchend:   stop shooting
+function handleTouch(e) {
   if (phase !== 'playing') return;
   if (e.target.tagName === 'BUTTON' || e.target.id === 'wishInput') return;
-  lastT = Date.now(); shooting = true;
   const t = e.touches[0];
+  if (!t) return;
   player.tx = t.clientX;
-  player.ty = Math.max(H * .5, Math.min(H * .93, t.clientY));
-  tryShoot();
-}, {passive:true});
-window.addEventListener('touchend', () => shooting = false);
+  player.ty = Math.max(H * .45, Math.min(H * .93, t.clientY));
+}
 
-// auto-fire while holding
+document.addEventListener('touchstart', e => {
+  if (phase !== 'playing') return;
+  if (e.target.tagName === 'BUTTON' || e.target.id === 'wishInput') return;
+  lastT = Date.now();
+  shooting = true;
+  handleTouch(e);
+  tryShoot();
+}, { passive: true });
+
+document.addEventListener('touchmove', e => {
+  if (phase !== 'playing') return;
+  handleTouch(e);
+}, { passive: true }); // passive:true = no preventDefault, smooth scroll not blocked
+
+document.addEventListener('touchend', e => {
+  if (e.target.tagName === 'BUTTON' || e.target.id === 'wishInput') return;
+  shooting = false;
+});
+
+// auto-fire while finger held down
 setInterval(() => { if (shooting && phase === 'playing') tryShoot(); }, SHOOT_CD);
 
 window.addEventListener('resize', resize);
