@@ -70,9 +70,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#050818;font-family:
 #dmgFlash.go{animation:dmgAnim .35s ease-out forwards}
 #toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:rgba(200,180,255,.1);border:1px solid rgba(200,180,255,.18);color:rgba(220,210,255,.7);padding:8px 18px;font-size:9px;letter-spacing:.13em;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
 #toast.on{opacity:1}
-/* camera overlay */
-#camVideo{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1);pointer-events:none;opacity:0;z-index:1}
-#camVideo.on{opacity:1}
+/* snap button active */
 
 @keyframes pulse{0%,100%{opacity:.2}50%{opacity:.36}}
 @keyframes comboPop{0%{opacity:0;transform:scale(.7)}25%{opacity:.9;transform:scale(1.08)}60%{opacity:.7;transform:scale(1)}100%{opacity:0;transform:scale(.95)}}
@@ -83,7 +81,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#050818;font-family:
 </head>
 <body>
 <audio id="bgm" src="Falling_for_You.mp3" loop preload="auto"></audio>
-<video id="camVideo" autoplay playsinline muted></video>
 <canvas id="c"></canvas>
 <div class="ov grain"></div>
 <div class="ov vign"></div>
@@ -119,7 +116,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#050818;font-family:
 <div id="wishModal">
   <div class="wishBox">
     <div class="wishStar">✦</div>
-    <div class="wishLabel">you caught the rarest star<span>make a wish</span></div>
+    <div class="wishLabel">
+      you caught the rarest star<br>
+      <span style="font-size:13px;font-style:normal;font-family:'Cormorant Garamond',Georgia,serif;color:rgba(220,210,255,.6);letter-spacing:.02em;display:block;margin-top:6px">특별한 별을 잡았네요!</span>
+      <span>make a wish</span>
+      <span style="font-size:11px;font-style:normal;font-family:'Space Grotesk',sans-serif;color:rgba(200,190,255,.45);letter-spacing:.08em;display:block;margin-top:2px">당신의 소원을 적어 보세요</span>
+    </div>
     <input id="wishInput" type="text" maxlength="40" placeholder="write your wish..." autocomplete="off" autocorrect="off" spellcheck="false">
     <button id="wishSendBtn" class="wishSend">Send it to the stars</button>
   </div>
@@ -292,7 +294,7 @@ var bullets=[],meteors=[],particles=[],rings=[],bgStars=[],powerItems=[];
 var hp=MAX_HP,score=0,combo=0,lastHit=0,energy=0;
 var wave=1,waveTimer=0,waveKills=0,waveTarget=8;
 var shooting=false,lastShot=0,ticker=null;
-var running=false,raf=null;
+var raf=null;
 var lastWishText='',lyricIdx=0,screenShake=0;
 
 function resize(){
@@ -340,7 +342,7 @@ function tryShoot(){
 
 // UPDATE
 function update(){
-  if(!running)return;
+  if(phase!=='playing')return;
   player.x+=(player.tx-player.x)*.14;
   player.y+=(player.ty-player.y)*.14;
 
@@ -658,7 +660,11 @@ function draw(ts){
   X.restore();
 }
 
-function loop(ts){update();draw(ts);if(running)raf=requestAnimationFrame(loop);}
+function loop(ts){
+  if(phase==='playing')update();
+  draw(ts);
+  if(phase!=='ended')raf=requestAnimationFrame(loop);
+}
 
 // UI
 function updateScore(){document.getElementById('scoreEl').textContent=score.toLocaleString()+'  pts';}
@@ -685,7 +691,7 @@ function showScreen(id){document.querySelectorAll('.scr').forEach(function(s){s.
 
 // WISH
 function openWishModal(){
-  running=false;
+  phase='wish';
   document.getElementById('wishInput').value='';
   document.getElementById('wishModal').classList.add('on');
   setTimeout(function(){document.getElementById('wishInput').focus();},350);
@@ -696,8 +702,7 @@ function closeWishModal(txt){
   lastWishText=txt&&txt.trim()?txt.trim():'';
   if(lastWishText)showLyric('"'+lastWishText+'"');
   Snd.rare();
-  running=true;
-  raf=requestAnimationFrame(loop);
+  phase='playing';
 }
 
 // CAPTURE EFFECTS
@@ -763,22 +768,23 @@ function startGame(){
   wave=1;waveTimer=0;waveKills=0;waveTarget=8;
   screenShake=0;lastWishText='';lyricIdx=0;shooting=false;
   player.x=player.tx=W/2; player.y=player.ty=H*.82;
-  var hf=document.getElementById('hpFill');
-  hf.style.width='100%'; hf.style.background='rgba(232,226,210,.35)';
+  document.getElementById('hpFill').style.width='100%';
+  document.getElementById('hpFill').style.background='rgba(232,226,210,.35)';
   document.getElementById('energyFill').style.width='0%';
   document.getElementById('waveEl').textContent='wave 1';
   updateScore();
-  running=true; phase='playing';
+  phase='playing';
   showScreen('hud');
   document.getElementById('snapBtn').style.display='flex';
   var bgm=document.getElementById('bgm');
   bgm.currentTime=0; bgm.volume=0.15;
   bgm.play().catch(function(){});
+  if(raf)cancelAnimationFrame(raf);
   raf=requestAnimationFrame(loop);
 }
 
 function endGame(){
-  running=false; phase='ended'; Snd.fadeOut();
+  phase='ended'; Snd.fadeOut();
   document.getElementById('snapBtn').style.display='none';
   var bgm=document.getElementById('bgm'); bgm.pause(); bgm.currentTime=0;
   meteors=[];bullets=[];
@@ -797,100 +803,11 @@ function doShutter(){
   },100);});
 }
 
-var camStream=null;
-
 function midGameSnap(){
   if(phase!=='playing')return;
-  // open camera first, then snap
-  if(!camStream){
-    openCamera();
-  } else {
-    doMidSnap();
-  }
-}
-
-function openCamera(){
-  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
-    toast('camera not available');
-    doMidSnap();
-    return;
-  }
-  navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false})
-    .then(function(stream){
-      camStream=stream;
-      var vid=document.getElementById('camVideo');
-      vid.srcObject=stream;
-      vid.play();
-      vid.classList.add('on');
-      toast('📷  pose! tap again to shoot');
-    })
-    .catch(function(){
-      toast('allow camera for selfie');
-      doMidSnap();
-    });
-}
-
-function closeCam(){
-  if(!camStream)return;
-  camStream.getTracks().forEach(function(t){t.stop();});
-  camStream=null;
-  var vid=document.getElementById('camVideo');
-  vid.classList.remove('on');
-  vid.srcObject=null;
-}
-
-function doMidSnap(){
-  running=false; clearInterval(ticker); shooting=false; phase='paused';
-  var vid=document.getElementById('camVideo');
-
-  // draw pop-art camera composite before snapshot
-  if(camStream&&vid.readyState>=2){
-    X.save();
-    // mirror-draw video with pop-art filter
-    var vw=vid.videoWidth||W, vh=vid.videoHeight||H;
-    var vr=vw/vh, cr=W/H;
-    var dw,dh,dx=0,dy=0;
-    if(vr>cr){dh=H;dw=H*vr;dx=(W-dw)/2;}
-    else{dw=W;dh=W/vr;dy=(H-dh)/2;}
-
-    // draw mirrored
-    X.save(); X.translate(W,0); X.scale(-1,1);
-    X.drawImage(vid,dx,dy,dw,dh);
-    X.restore();
-
-    // pop-art filter via pixel manipulation
-    var imgData=X.getImageData(0,0,W,H);
-    var d=imgData.data;
-    for(var i=0;i<d.length;i+=4){
-      // posterize to 3 levels per channel
-      var r=Math.round(d[i]/85)*85;
-      var g=Math.round(d[i+1]/85)*85;
-      var b=Math.round(d[i+2]/85)*85;
-      // duotone shift — warm highlights, cool shadows
-      var lum=(r+g+b)/3;
-      if(lum>160){
-        // highlight: warm gold-pink
-        d[i]=Math.min(255,r*1.15+30);
-        d[i+1]=Math.min(255,g*.85+10);
-        d[i+2]=Math.min(255,b*.7+20);
-      } else if(lum>80){
-        // midtone: purple
-        d[i]=Math.min(255,r*.7+40);
-        d[i+1]=Math.min(255,g*.6+10);
-        d[i+2]=Math.min(255,b*1.2+30);
-      } else {
-        // shadow: deep blue-purple
-        d[i]=Math.min(255,r*.4+10);
-        d[i+1]=Math.min(255,g*.4+5);
-        d[i+2]=Math.min(255,b*.8+30);
-      }
-      d[i+3]=Math.round(d[i+3]*.72); // semi-transparent over game
-    }
-    X.putImageData(imgData,0,0);
-    X.restore();
-    closeCam();
-  }
-
+  phase='paused';
+  clearInterval(ticker);
+  shooting=false;
   doShutter();
 }
 
@@ -921,21 +838,23 @@ function resumeGame(){
   document.getElementById('brow').classList.remove('show');
   document.getElementById('snapImg').classList.remove('dev');
   document.getElementById('snapBtn').style.display='flex';
-  phase='playing'; running=true;
+  phase='playing';
   showScreen('hud');
-  ticker=setInterval(function(){},1000);
-  raf=requestAnimationFrame(loop);
+  ticker=setInterval(function(){
+    tLeft--; updateStats();
+    if(tLeft<=0){clearInterval(ticker);endGame();}
+  },1000);
 }
 
 function restart(){
+  if(raf)cancelAnimationFrame(raf);
   document.getElementById('pol').classList.remove('show');
   document.getElementById('brow').classList.remove('show');
   document.getElementById('snapImg').classList.remove('dev');
   document.getElementById('snapBtn').style.display='none';
-  closeCam();
   var bgm=document.getElementById('bgm'); bgm.pause(); bgm.currentTime=0;
   phase='intro'; showScreen('intro');
-  bullets=[];meteors=[];particles=[];rings=[];powerItems=[];running=false;
+  bullets=[];meteors=[];particles=[];rings=[];powerItems=[];
 }
 
 // INSTAGRAM
@@ -1111,6 +1030,7 @@ bindBtn('saveBtn',doSave);
 bindBtn('igBtn',shareToInstagramStory);
 bindBtn('againBtn',restart);
 bindBtn('wishSendBtn',function(){closeWishModal(document.getElementById('wishInput').value);});
+
 document.getElementById('wishInput').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();closeWishModal(e.target.value);}});
 
 window.addEventListener('mousemove',function(e){if(phase!=='playing')return;player.tx=e.clientX;player.ty=Math.max(H*.45,Math.min(H*.93,e.clientY));});
