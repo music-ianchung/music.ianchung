@@ -4,10 +4,15 @@
   let id=null,secret='',nick='',connection='idle',solo=false,pollTimer=null,joining=false,ownReaction=null;
   let local={x:0,y:0,z:hall==='greenhouse'?36:13,heading:0,seat:-1,moving:false},people=[],programState=null,offset=0,lastProgramAt=0;
   const peers=new Map();let queue=Promise.resolve(),shared=hall!=='greenhouse',lastFrame=performance.now();
-  try{nick=localStorage.getItem('listening-room-nickname')||'';secret=sessionStorage.getItem('listening-room-guest')||'';}catch{}
+  try{secret=sessionStorage.getItem('listening-room-guest')||'';}catch{}
   const nicknameBox=document.createElement('div');nicknameBox.id='nicknameBox';
   nicknameBox.innerHTML='<label for="visitorName">이곳에서 불릴 이름</label><input id="visitorName" maxlength="12" autocomplete="off" spellcheck="false" placeholder="닉네임 · 1~12자"><p id="nicknameMessage" role="status">함께 있는 사람들에게 이 이름이 보여요.</p><button id="soloEntry" hidden>지금은 혼자 들어갈게요</button>';
-  $('tuning').parentNode.insertBefore(nicknameBox,$('tuning'));$('visitorName').value=nick;
+  $('enter').before(nicknameBox);
+  const adjectives=['행복한','다정한','포근한','고요한','느긋한','따뜻한','반짝이는','꿈꾸는','산책하는','미소짓는','평온한','별빛 속'];
+  const composers=['바흐','모차르트','쇼팽','슈베르트','드뷔시','라벨','브람스','베토벤','사티','슈만','비발디','멘델스존'];
+  const pick=values=>{const n=new Uint32Array(1);crypto.getRandomValues(n);return values[n[0]%values.length];};
+  $('visitorName').value=pick(adjectives)+' '+pick(composers);
+  $('nicknameMessage').textContent='그대로 들어가거나, 원하는 이름으로 바꿔주세요.';
   const bar=document.createElement('aside');bar.id='presenceBar';bar.setAttribute('aria-label','함께 머무는 사람들');
   bar.innerHTML='<button id="peopleToggle" aria-expanded="false">함께 머무는 중</button><div id="peoplePanel" hidden><strong>같은 공간에 머무는 이름들</strong><ul id="peopleList"></ul><p id="presenceNote" role="status"></p></div><button id="freeSeat" aria-label="가까운 빈자리에 앉기">빈자리</button><div class="quietGestures" role="group" aria-label="조용한 인사"><button data-greet="wave" aria-label="손인사">손인사</button><button data-greet="nod" aria-label="고개 끄덕이기">끄덕임</button></div>';
   if(hall!=='greenhouse')bar.insertAdjacentHTML('beforeend','<button id="sharedListening" aria-pressed="true">함께 듣기</button>');
@@ -109,3 +114,4 @@
   const syncVisibility=()=>{bar.inert=!document.body.classList.contains('hasEntered')||document.body.classList.contains('arrivalActive')||document.body.classList.contains('ritualActive')||document.body.classList.contains('quiet');};
   new MutationObserver(syncVisibility).observe(document.body,{attributes:true,attributeFilter:['class']});syncVisibility();ui();
 })();
+
