@@ -1,6 +1,6 @@
 (()=>{
 const E=window.hallRitual;E.carriedCandle=true;E.candle=null;E.placingCandle=false;E.restPose=null;E.distanceGain=1;E.blessing=0;
-const hall=new URLSearchParams(location.search).get('hall')==='vineyard'?'vineyard':'chamber',key='listening-room-candle-'+hall;
+const requestedHall=new URLSearchParams(location.search).get('hall'),hall=['vineyard','greenhouse'].includes(requestedHall)?requestedHall:'chamber',key='listening-room-candle-'+hall;
 try{let c=JSON.parse(localStorage.getItem(key));if(c&&Number.isFinite(c.x)&&Number.isFinite(c.y)&&Number.isFinite(c.z)&&Date.now()-c.created<20*60*1000){E.candle=c;E.carriedCandle=false;}}catch{}
 window.applyRoomVolume=()=>{let v=+$('volume').value/100*(E.duck??1)*(E.distanceGain??1);if(audio&&master)master.gain.setTargetAtTime(v,audio.currentTime,.7);window.mediaVolume?.(v);};
 window.onCandlePlaced=c=>{if(!c)return;E.candle={...c,created:Date.now()};E.carriedCandle=false;E.placingCandle=false;document.body.classList.remove('placingCandle');$('candlePanel').hidden=true;$('candleButton').textContent='♧ 내 빛 옮기기';try{localStorage.setItem(key,JSON.stringify(E.candle));}catch{} };

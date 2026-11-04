@@ -8,3 +8,26 @@
 
 .brand{color:inherit;text-decoration:none}
 .brand:focus-visible{outline:1px solid currentColor;outline-offset:6px}
+
+/* A quiet, personal listening desk under the glass roof. */
+.greenhouse header .topright>span{font-size:7px;letter-spacing:1.3px}
+#listeningDesk{position:fixed;left:28px;bottom:145px;z-index:15;width:260px;color:#d6ddc6;font-size:11px}
+#deskOpen{padding:12px 18px;border:1px solid #b4c5a842;border-radius:24px;background:#0b1c1be6;color:#d6ddc6;font:inherit;letter-spacing:.05em}
+#deskControls{padding:22px;margin-top:9px;border:1px solid #b7c2a530;background:#0c1e1dee;backdrop-filter:blur(16px);border-radius:16px;box-shadow:0 16px 60px #0005}
+#deskControls small{font-size:7px;letter-spacing:1.8px;color:#92a993}
+#deskControls h2{font:17px Georgia,serif;margin:12px 0 18px;color:#e4e6cf}
+#deskControls button:not(#deskOpen){font:10px sans-serif;color:#cbd5be;border:1px solid #a8ba9e33;border-radius:8px;padding:10px;background:#809b7a09}
+#deskControls>button{width:100%;margin:4px 0}
+#deskControls button[aria-pressed=true]{border-color:#c6d5af88;color:#edf0d5;background:#94ae7d22}
+#deskControls button:disabled{opacity:.4;cursor:default}
+.deskSounds{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:13px 0}
+.deskSounds button:first-child{grid-column:1/-1}
+#deskStatus{font-size:9px;line-height:1.8;color:#94aa97;margin:12px 0 0}
+.tapeWindow{display:flex;align-items:center;justify-content:space-around;padding:10px 0;border:1px solid #9fb79926;background:#192c25;border-radius:6px;margin:9px 0}
+.tapeWindow span{font-size:6px;letter-spacing:1px;opacity:.65}
+.tapeWindow i{height:18px;width:18px;border:3px dotted #b4c29a88;border-radius:50%}
+.tapeRunning .tapeWindow i{animation:reelTurn 8s linear infinite}
+@keyframes reelTurn{to{transform:rotate(360deg)}}
+.ritualActive #listeningDesk,.arrivalActive #listeningDesk,body:not(.hasEntered) #listeningDesk,.quiet #listeningDesk{opacity:0;pointer-events:none}
+@media(prefers-reduced-motion:reduce){.tapeRunning .tapeWindow i{animation:none}}
+@media(max-width:700px){header{padding:20px 18px}.topright{gap:6px}.topright>span{display:none}.halllink{font-size:8px;padding:7px}#listeningDesk{left:16px;bottom:154px;width:228px}#deskControls{padding:16px;max-height:54vh;overflow:auto}}

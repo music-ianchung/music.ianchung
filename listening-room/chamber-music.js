@@ -1,8 +1,14 @@
 // The chamber recordings have no displayed track titles.
 (() => {
-  if (new URLSearchParams(location.search).get('hall') === 'vineyard') return;
+  const hall=new URLSearchParams(location.search).get('hall');
+  if (hall==='greenhouse') return;
+  const roomName=hall==='vineyard'?'빈야드홀':'체임버홀';
 
-  const recordings = [
+  const recordings = hall==='vineyard' ? [
+    {url:'vineyard-01.m4a',duration:319.56},
+    {url:'vineyard-02.m4a',duration:319.24},
+    {url:'vineyard-03.m4a',duration:319.68}
+  ] : [
     { url: 'chamber-01.m4a', duration: 319 },
     { url: 'chamber-02.m4a', duration: 319.6 }
   ];
@@ -88,7 +94,7 @@
       if (!wantsPlay) { current.pause(); return; }
       window.musicRest = false;
       ui(true);
-      status('체임버홀의 연주를 감상하고 있어요.');
+      status(`${roomName}의 연주를 감상하고 있어요.`);
     };
     current.onpause = () => {
       if (recording === current && !current.ended && gap <= 0) ui(false);
@@ -148,7 +154,7 @@
     track = (index + recordings.length) % recordings.length;
     window.musicRest = false;
     renderTracks();
-    status('체임버홀의 연주를 선택했어요.');
+    status(`${roomName}의 연주를 선택했어요.`);
     setPlay(resume);
   };
   $('seek').oninput = event => {
@@ -168,7 +174,7 @@
     window.musicRest = false;
     renderTracks();
     ui(false);
-    status('체임버홀의 연주로 돌아왔어요. 재생 버튼을 눌러주세요.');
+    status(`${roomName}의 연주로 돌아왔어요. 재생 버튼을 눌러주세요.`);
   };
   // External music can still show its own name; the two hall recordings stay unnamed.
   $('musicform').addEventListener('submit', () => { if (sourceMode !== 'chamber') $('title').hidden = false; });
@@ -182,6 +188,6 @@
     }
   }, 100);
   $('program').querySelector('h2').textContent = '연주 목록';
-  $('program').lastElementChild.textContent = '두 편의 연주 · 혼자 감상하는 공간';
+  $('program').lastElementChild.textContent = `${recordings.length}편의 연주 · 혼자 감상하는 공간`;
   renderTracks();
 })();
