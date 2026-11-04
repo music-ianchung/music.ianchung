@@ -62,18 +62,30 @@ function glow(p,r,a){let pp=point(p);if(!pp)return;let rr=r*focal/pp.d;if(rr<.1)
 box(0,11.90,24.5,3.0,.12,2.2,['#3d3427','#4b3c2a','#69563a']);box(0,12.02,25.5,3.0,.55,.08,'#5c4a30');box(0,9.5,19.25,1.8,2.0,.12,'#584833');box(0,9.5,18.9,1.7,.35,.5,'#4f4433');
 const worldGeometryCount=geo.length;
 function ellipsoid(x,y,z,rx,ry,rz,col){let N=12,M=8;for(let j=0;j<M;j++)for(let i=0;i<N;i++){let a=i/N*Math.PI*2,b=(i+1)/N*Math.PI*2,v=-Math.PI/2+j/M*Math.PI,vv=-Math.PI/2+(j+1)/M*Math.PI;let pt=(u,v)=>[x+Math.cos(u)*Math.cos(v)*rx,y+Math.sin(v)*ry,z+Math.sin(u)*Math.cos(v)*rz];let base=parseInt(col.slice(1),16),shade=.78+.22*(Math.cos(a)*.4+Math.sin(v)*.3+.6);let rgb=[base>>16,(base>>8)&255,base&255].map(c=>Math.min(255,Math.round(c*shade)));face([pt(a,v),pt(b,v),pt(b,vv),pt(a,vv)],`rgb(${rgb})`);}}
-function avatar(t){geo.length=worldGeometryCount;let start=geo.length,sitting=(seat>=0||window.hallRitual?.restPose==='blanket')&&!moving,bob=moving?Math.sin(t*.012)*.035:Math.sin(t*.0018)*.009,hip=sitting?.88:.78,torso=sitting?1.1:1.03,head=sitting?1.65:1.61;let stride=moving?Math.sin(t*.012)*.18:0;
-// Shoes and legs have a different pose when seated.
-if(sitting){for(let x of [-.16,.16]){ellipsoid(x,.7,-.17,.105,.115,.28,'#d8ccb0');ellipsoid(x,.42,-.37,.085,.25,.09,'#b3a88a');ellipsoid(x,.18,-.44,.13,.095,.18,'#584d3e');}}else{for(let [x,k]of [[-.16,1],[.16,-1]]){ellipsoid(x,.39,.03+stride*k,.10,.34,.11,'#c7b998');ellipsoid(x,.11,-.04+stride*k,.14,.10,.21,'#62533e');}}
-ellipsoid(0,torso+bob,.02,.33,.41,.23,'#a7b18a');ellipsoid(0,hip+bob,.02,.34,.16,.24,'#a7b18a');for(let [x,k]of [[-.39,1],[.39,-1]]){ellipsoid(x,torso-.05+bob,-stride*k*.6,.105,.28,.105,'#adb78e');ellipsoid(x,torso-.30+bob,-stride*k*.6,.085,.09,.085,'#edd4ac');}
-ellipsoid(0,head+bob,0,.32,.34,.29,'#efd6af');ellipsoid(0,head+.13+bob,.045,.332,.26,.286,'#514637');ellipsoid(-.30,head-.02+bob,0,.055,.09,.07,'#e9cda6');ellipsoid(.30,head-.02+bob,0,.055,.09,.07,'#e9cda6');
-// Soft cream scarf and two tiny eyes, visible when looking around the visitor.
-ellipsoid(0,torso+.27+bob,-.02,.32,.09,.255,'#eee5ca');box(.12,torso-.06+bob,-.235,.12,.35,.06,'#e5dcc1');ellipsoid(-.105,head+bob,-.276,.022,.027,.018,'#453f33');ellipsoid(.105,head+bob,-.276,.022,.027,.018,'#453f33');
-if(window.hallRitual?.restPose==='blanket'&&!moving){face([[-.36,.90,-.20],[.36,.90,-.20],[.38,.30,-.50],[-.38,.30,-.50]],'#b4a381');face([[-.36,.90,-.20],[-.38,.30,-.50],[-.39,.31,.08],[-.36,.88,.14]],'#97886d');face([[.36,.90,-.20],[.38,.30,-.50],[.39,.31,.08],[.36,.88,.14]],'#c2b292');}
-if(window.hallRitual?.carriedCandle){box(-.43,.82,-.07,.12,.22,.12,['#ac956b','#806d4a','#e5d0a0']);}
-if(window.hallRitual?.restPose==='lean'&&!moving)for(let i=start;i<geo.length;i++)geo[i].pts=geo[i].pts.map(([x,y,z])=>[x,y,z+Math.max(0,y-.2)*.12]);
-const ritual=window.hallRitual;if(ritual?.mood){let px=.47,py=torso-.20+bob,pz=-.05,settled=ritual.settled;if(ritual.mood==='stone'){ellipsoid(px,py,pz,.13,.10,.11,'#8c887b');if(settled)ellipsoid(px,py+.075,pz,.11,.04,.09,'#83a16a');}else if(ritual.mood==='water'){ellipsoid(px,py,pz,.12,.10,.10,settled?'#bfd9cf':'#84a8a1');}else if(ritual.mood==='leaf'){face([[px-.10,py,pz],[px,py+.18,pz],[px+.10,py,pz],[px,py-.07,pz+.025]],settled?'#b3c88b':'#b49e66');}else{for(let k=0;k<4;k++)ellipsoid(px+Math.sin(k*2)*.06,py+k*.025,pz+Math.cos(k*2)*.035,settled?.07:.10,.024,.035,settled?'#dec89c':'#a48b6e');}}
-let co=Math.cos(person.heading),si=Math.sin(person.heading);for(let i=start;i<geo.length;i++)geo[i].pts=geo[i].pts.map(([x,y,z])=>[person.x+x*co-z*si,y+person.y,person.z+x*si+z*co]);for(let i=start;i<geo.length;i++)geo[i].hero=true;
+function avatar(t){
+geo.length=worldGeometryCount;const start=geo.length,E=window.hallRitual,sitting=(seat>=0||E?.restPose==='blanket')&&!moving;
+const stride=moving?Math.sin(t*.012)*.10:0,bob=moving?Math.abs(Math.sin(t*.012))*.025:Math.sin(t*.0017)*.008;
+const torso=sitting?1.08:.81,head=sitting?1.64:1.36,cream='#f0e7d2',shadow='#d6c9aa',sage='#a8b8a0';
+// A soft little visitor: one round hood, one bean body, tiny mittens and feet.
+if(sitting){for(const x of [-.145,.145]){ellipsoid(x,.72,-.16,.115,.105,.24,cream);ellipsoid(x,.48,-.34,.095,.19,.095,cream);ellipsoid(x,.27,-.39,.13,.085,.16,shadow);}}
+else{for(const [x,k] of [[-.145,1],[.145,-1]]){ellipsoid(x,.32,stride*k,.105,.21,.115,cream);ellipsoid(x,.13,-.045+stride*k,.135,.09,.17,shadow);}}
+ellipsoid(0,torso+bob,.025,.32,.34,.26,cream);
+ellipsoid(0,torso-.19+bob,.025,.31,.18,.255,cream);
+for(const [x,k] of [[-.36,1],[.36,-1]]){const held=k===1&&E?.carriedCandle,y=held?.94:torso-.08+bob,z=held?-.07:-stride*k*.55;ellipsoid(x,y,z,.105,.185,.115,cream);ellipsoid(x,y-.125,z-.035,.10,.105,.105,cream);}
+ellipsoid(0,head+bob,.015,.435,.40,.365,cream);
+// Small round ears read as a cozy hood, including from behind.
+for(const x of [-.30,.30]){ellipsoid(x,head+.29+bob,.025,.115,.13,.105,cream);ellipsoid(x,head+.30+bob,-.065,.054,.065,.025,'#dfcfb5');}
+ellipsoid(0,head-.035+bob,-.285,.315,.245,.115,'#fff2dc');
+for(const x of [-.105,.105])ellipsoid(x,head-.005+bob,-.397,.027,.034,.018,'#51483e');
+for(const x of [-.19,.19])ellipsoid(x,head-.085+bob,-.378,.052,.028,.014,'#dcae9d');
+ellipsoid(0,head-.085+bob,-.403,.021,.014,.012,'#8a7260');
+ellipsoid(0,torso+.25+bob,-.005,.295,.07,.265,sage);
+ellipsoid(.12,torso+.10+bob,-.245,.065,.16,.045,sage);
+if(E?.restPose==='blanket'&&!moving){ellipsoid(0,.87,-.20,.37,.13,.34,'#b8bca6');face([[-.36,.90,-.20],[.36,.90,-.20],[.36,.35,-.48],[-.36,.35,-.48]],'#b8bca6');face([[-.36,.90,-.20],[-.36,.35,-.48],[-.38,.36,.08],[-.36,.88,.14]],'#a3aa92');face([[.36,.90,-.20],[.36,.35,-.48],[.38,.36,.08],[.36,.88,.14]],'#cbd0ba');}
+if(E?.carriedCandle)box(-.43,.82,-.07,.12,.22,.12,['#ac956b','#806d4a','#e5d0a0']);
+if(E?.restPose==='lean'&&!moving)for(let i=start;i<geo.length;i++)geo[i].pts=geo[i].pts.map(([x,y,z])=>[x,y,z+Math.max(0,y-.2)*.12]);
+if(E?.mood){const px=.45,py=torso-.12+bob,pz=-.05,settled=E.settled;if(E.mood==='stone'){ellipsoid(px,py,pz,.11,.085,.095,'#8c887b');if(settled)ellipsoid(px,py+.065,pz,.09,.035,.075,'#83a16a');}else if(E.mood==='water')ellipsoid(px,py,pz,.10,.085,.085,settled?'#bfd9cf':'#84a8a1');else if(E.mood==='leaf')face([[px-.08,py,pz],[px,py+.15,pz],[px+.08,py,pz],[px,py-.05,pz+.025]],settled?'#b3c88b':'#b49e66');else for(let k=0;k<4;k++)ellipsoid(px+Math.sin(k*2)*.05,py+k*.02,pz+Math.cos(k*2)*.03,settled?.06:.08,.021,.03,settled?'#dec89c':'#a48b6e');}
+const co=Math.cos(person.heading),si=Math.sin(person.heading);for(let i=start;i<geo.length;i++){geo[i].pts=geo[i].pts.map(([x,y,z])=>[person.x+x*co-z*si,y+person.y,person.z+x*si+z*co]);geo[i].hero=true;}
 }
 
 function limb(a,b,r,col){let start=geo.length,dx=b[0]-a[0],dy=b[1]-a[1],dz=b[2]-a[2],length=Math.hypot(dx,dy,dz);ellipsoid(0,0,0,r,length/2,r,col);let up=[dx/length,dy/length,dz/length],side=Math.abs(up[1])<.9?[up[2],0,-up[0]]:[1,0,0],sn=Math.hypot(...side);side=side.map(v=>v/sn);let forward=[side[1]*up[2]-side[2]*up[1],side[2]*up[0]-side[0]*up[2],side[0]*up[1]-side[1]*up[0]];for(let i=start;i<geo.length;i++)geo[i].pts=geo[i].pts.map(([x,y,z])=>[(a[0]+b[0])/2+x*side[0]+y*up[0]+z*forward[0],(a[1]+b[1])/2+x*side[1]+y*up[1]+z*forward[1],(a[2]+b[2])/2+x*side[2]+y*up[2]+z*forward[2]]);}
