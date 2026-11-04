@@ -2,7 +2,7 @@
 window.createHallRenderer=(options={})=>{
  const surface=document.createElement('canvas'),gl=surface.getContext('webgl',{alpha:true,antialias:true,preserveDrawingBuffer:true,premultipliedAlpha:false});
  if(!gl)return null;
- const vertex=`attribute vec3 position;attribute vec4 color;uniform vec3 camera;uniform vec4 angles;uniform vec2 scale;uniform float sacred;varying vec4 vColor;void main(){vec3 d=position-camera;float zz=d.x*angles.y-d.z*angles.x;float xx=d.x*angles.x+d.z*angles.y;float yy=d.y*angles.z-zz*angles.w;float z=zz*angles.z+d.y*angles.w;gl_Position=vec4(xx*scale.x,yy*scale.y,1.000667*z-0.200067,z);vColor=color;if(sacred>.5){float piano=exp(-length((position.xz-vec2(-.7,-10.0))*vec2(.16,.10)));float roof=exp(-length(position-vec3(0.,16.3,-8.0))*.22);float light=.59+.44*piano+.22*roof;vec3 lit=color.rgb*vec3(1.06,1.03,.96)*light;float haze=1.-exp(-length(d)*.007);vColor.rgb=mix(lit,vec3(.32,.38,.33),haze*.5);}}`;
+ const vertex=`attribute vec3 position;attribute vec4 color;uniform vec3 camera;uniform vec4 angles;uniform vec2 scale;uniform float sacred;varying vec4 vColor;void main(){vec3 d=position-camera;float zz=d.x*angles.y-d.z*angles.x;float xx=d.x*angles.x+d.z*angles.y;float yy=d.y*angles.z-zz*angles.w;float z=zz*angles.z+d.y*angles.w;gl_Position=vec4(xx*scale.x,yy*scale.y,1.00227531*z-0.50056883,z);vColor=color;if(sacred>.5){float piano=exp(-length((position.xz-vec2(-.7,-10.0))*vec2(.28,.22)));float roof=exp(-length(position-vec3(0.,16.3,-8.0))*.28);vec3 light=vec3(.20,.27,.34)+vec3(.87,.72,.47)*piano+vec3(.32,.35,.33)*roof;vec3 lit=color.rgb*light;if(color.r>.77&&color.g>.77&&color.b>.61)lit=max(lit,color.rgb*.88);float haze=1.-exp(-length(d)*.009);vColor.rgb=mix(lit,vec3(.075,.115,.13),haze*.45);}}`;
  const fragment=`precision mediump float;varying vec4 vColor;void main(){gl_FragColor=vColor;}`;
  function shader(type,source){const item=gl.createShader(type);gl.shaderSource(item,source);gl.compileShader(item);if(!gl.getShaderParameter(item,gl.COMPILE_STATUS))throw new Error('Unable to prepare the hall renderer');return item;}
  const program=gl.createProgram();gl.attachShader(program,shader(gl.VERTEX_SHADER,vertex));gl.attachShader(program,shader(gl.FRAGMENT_SHADER,fragment));gl.linkProgram(program);gl.useProgram(program);
@@ -36,6 +36,17 @@ window.createHallPhysics=(blockers,chairs,floorHeight)=>{
    for(const i of chairBuckets.get(bucketKey(x,z))||[]){if(i===ignoreSeat)continue;const s=chairs[i];const sy=s.y||0;if(Math.abs(y-sy)>.65)continue;const theta=s.theta||0,dx=x-s.x,dz=z-s.z,localX=dx*Math.cos(theta)-dz*Math.sin(theta),localZ=dx*Math.sin(theta)+dz*Math.cos(theta);if(Math.abs(localX)<(s.halfWidth||.39)+radius&&Math.abs(localZ)<(s.halfDepth||.39)+radius)return true;}
    return false;
  }
- function camera(from,to){let limit=1;const start=[from.x,from.y,from.z],delta=[to.x-from.x,to.y-from.y,to.z-from.z];for(const b of blockers){let near=0,far=1;const lo=[b.x-b.a/2-.20,b.y-.10,b.z-b.c/2-.20],hi=[b.x+b.a/2+.20,b.y+b.b+.10,b.z+b.c/2+.20];for(let i=0;i<3;i++){if(Math.abs(delta[i])<.0001){if(start[i]<lo[i]||start[i]>hi[i]){near=2;break;}}else{let a=(lo[i]-start[i])/delta[i],c=(hi[i]-start[i])/delta[i];if(a>c)[a,c]=[c,a];near=Math.max(near,a);far=Math.min(far,c);}}if(near<=far&&near>0&&near<limit)limit=near;}const t=limit<1?Math.max(.15,limit-.06):1;return {x:from.x+delta[0]*t,y:from.y+delta[1]*t,z:from.z+delta[2]*t};}
+ function camera(from,to,options={}){let limit=1;const start=[from.x,from.y,from.z],delta=[to.x-from.x,to.y-from.y,to.z-from.z];for(const b of blockers){if(options.architectureOnly&&b.b<2.5)continue;let near=0,far=1;const lo=[b.x-b.a/2-.20,b.y-.10,b.z-b.c/2-.20],hi=[b.x+b.a/2+.20,b.y+b.b+.10,b.z+b.c/2+.20];for(let i=0;i<3;i++){if(Math.abs(delta[i])<.0001){if(start[i]<lo[i]||start[i]>hi[i]){near=2;break;}}else{let a=(lo[i]-start[i])/delta[i],c=(hi[i]-start[i])/delta[i];if(a>c)[a,c]=[c,a];near=Math.max(near,a);far=Math.min(far,c);}}if(near<=far&&near>0&&near<limit)limit=near;}const t=limit<1?Math.max(0,limit-.035):1;return {x:from.x+delta[0]*t,y:from.y+delta[1]*t,z:from.z+delta[2]*t};}
  return {blocked,camera,floor:floorHeight,move(from,x,z){const height=floorHeight(x,z);if(Math.abs(height-from.y)>.65)return from;if(!blocked(x,z,height))return {x,y:height,z};if(!blocked(x,from.z,from.y))return {x,y:from.y,z:from.z};if(!blocked(from.x,z,from.y))return {x:from.x,y:from.y,z};return from;},exit(from){for(const r of [.75,1.05,1.5,2])for(let i=0;i<24;i++){const angle=i/24*Math.PI*2,x=from.x+Math.cos(angle)*r,z=from.z+Math.sin(angle)*r,y=floorHeight(x,z);if(Math.abs(y-from.y)<.65&&!blocked(x,z,y))return {x,y,z};}return {...from};}};
+};
+
+// Keep the desired orbit independent of the collision-corrected camera.
+window.createHallCameraRig=(physics,initial)=>{
+ let goal={...initial},boom=Infinity;
+ return {reset(value){goal={...value};boom=Infinity;},update(from,desired,dt){
+  const blend=1-Math.exp(-Math.min(dt,.1)*4);for(const k of ['x','y','z','yaw','pitch'])goal[k]+=(desired[k]-goal[k])*blend;
+  const safe=physics.camera(from,goal,{architectureOnly:true}),dx=goal.x-from.x,dy=goal.y-from.y,dz=goal.z-from.z,length=Math.hypot(dx,dy,dz),available=Math.hypot(safe.x-from.x,safe.y-from.y,safe.z-from.z);
+  boom=Math.min(available,boom+Math.min(dt,.1)*2);const ratio=length>.0001?Math.min(1,boom/length):1;
+  return {...goal,x:from.x+dx*ratio,y:from.y+dy*ratio,z:from.z+dz*ratio};
+ }};
 };
