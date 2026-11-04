@@ -102,6 +102,7 @@
     };
     current.onended = () => {
       if (recording !== current || !wantsPlay) return;
+      window.roomSoundscapes?.applaud('recording-'+track);
       gap = 8;
       last = performance.now();
       window.musicRest = true;
@@ -121,6 +122,7 @@
   }
 
   setPlay = async on => {
+    if(!on)window.roomSoundscapes?.stopApplause();
     if (sourceMode !== 'chamber') {
       $('title').hidden = false;
       return originalSetPlay(on);
@@ -197,7 +199,7 @@
     const resume=wantsPlay||externalPlaying;applyingSync=true;pendingSeek=program.elapsed;
     try{
       if(program.index!==track)selectTrack(program.index);
-      if(program.gap>0){gap=program.gap;recording?.pause();window.musicRest=true;if(resume)ui(true);}
+      if(program.gap>0){if(gap<=0&&resume)window.roomSoundscapes?.applaud('recording-'+track);gap=program.gap;recording?.pause();window.musicRest=true;if(resume)ui(true);}
       else{gap=0;window.musicRest=false;if(recording?.readyState>0){if(Math.abs(recording.currentTime-program.elapsed)>1.4)recording.currentTime=program.elapsed;pendingSeek=null;if(resume&&recording.paused)setPlay(true);}}
       progress();
     }finally{applyingSync=false;}

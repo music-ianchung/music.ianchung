@@ -1,3 +1,15 @@
+// Smooth ellipsoids: continuous vertex lighting on GPU, analytic gradients on Canvas.
+window.softSphereMesh=(shape,color)=>{
+ const N=shape.detail||20,M=Math.round(N*.65),out=[],o=shape.pts[0],axes=shape.pts.slice(1).map(v=>v.map((n,i)=>n-o[i]));
+ const vertex=(u,v)=>{const n=[Math.cos(u)*Math.cos(v),Math.sin(v),Math.sin(u)*Math.cos(v)],p=o.map((q,i)=>q+axes[0][i]*n[0]+axes[1][i]*n[1]+axes[2][i]*n[2]),light=.76+.24*Math.max(0,-n[0]*.35+n[1]*.72+n[2]*.45);return [...p,color[0]*light,color[1]*light,color[2]*light,color[3]];};
+ for(let j=0;j<M;j++)for(let i=0;i<N;i++){const a=i/N*Math.PI*2,b=(i+1)/N*Math.PI*2,c=-Math.PI/2+j/M*Math.PI,d=-Math.PI/2+(j+1)/M*Math.PI;out.push(...vertex(a,c),...vertex(b,c),...vertex(b,d),...vertex(a,c),...vertex(b,d),...vertex(a,d));}return out;
+};
+window.drawSoftSphere=(shape,project,ctx,color=shape.col)=>{
+ const p=project(shape.pts[0]);if(!p)return;const axes=shape.pts.slice(1).map(v=>project(v));if(axes.some(v=>!v))return;
+ let a=0,b=0,d=0;for(const q of axes){const x=q.x-p.x,y=q.y-p.y;a+=x*x;b+=x*y;d+=y*y;}const root=Math.sqrt(Math.max(0,(a-d)**2+4*b*b)),rx=Math.sqrt(Math.max(.01,(a+d+root)/2)),ry=Math.sqrt(Math.max(.01,(a+d-root)/2)),angle=.5*Math.atan2(2*b,a-d);if(rx>innerWidth*2||ry>innerHeight*2)return;
+ const rgb=color[0]==='#'?[0,2,4].map(i=>parseInt(color.slice(1+i,3+i),16)):(color.match(/[\d.]+/g)||[]).slice(0,3).map(Number);if(rgb.length!==3)return;
+ const tint=k=>'rgb('+rgb.map(v=>Math.max(0,Math.min(255,Math.round(v*k)))).join(',')+')';ctx.save();ctx.translate(p.x,p.y);ctx.rotate(angle);ctx.scale(rx,ry);const gradient=ctx.createRadialGradient(-.27,-.30,.05,0,0,1.15);gradient.addColorStop(0,tint(1.04));gradient.addColorStop(.55,tint(.94));gradient.addColorStop(1,tint(.76));ctx.fillStyle=gradient;ctx.beginPath();ctx.arc(0,0,1,0,Math.PI*2);ctx.fill();ctx.restore();
+};
 // Depth-tested triangles keep intersecting furniture and architecture stable.
 window.createHallRenderer=(options={})=>{
  const surface=document.createElement('canvas'),gl=surface.getContext('webgl',{alpha:true,antialias:true,preserveDrawingBuffer:true,premultipliedAlpha:false});
@@ -9,7 +21,7 @@ window.createHallRenderer=(options={})=>{
  const locations={sacred:gl.getUniformLocation(program,'sacred'),position:gl.getAttribLocation(program,'position'),color:gl.getAttribLocation(program,'color'),camera:gl.getUniformLocation(program,'camera'),angles:gl.getUniformLocation(program,'angles'),scale:gl.getUniformLocation(program,'scale')};
  const colors=new Map();function rgba(value){if(colors.has(value))return colors.get(value);let c;if(value[0]==='#'){let h=value.slice(1);if(h.length===3)h=h.split('').map(x=>x+x).join('');c=[0,2,4].map(i=>parseInt(h.slice(i,i+2),16)/255);c.push(h.length===8?parseInt(h.slice(6),16)/255:1);}else{c=(value.match(/[\d.]+/g)||['128','128','128']).map(Number);c=[c[0]/255,c[1]/255,c[2]/255,c.length>3?c[3]:1];}colors.set(value,c);return c;}
  let paint=f=>f.col;
- function vertices(faces){const out=[];for(const f of faces){const c=rgba(paint(f));for(let i=1;i<f.pts.length-1;i++)for(const p of [f.pts[0],f.pts[i],f.pts[i+1]])out.push(...p,...c);}return new Float32Array(out);}
+ function vertices(faces){const out=[];for(const f of faces){const c=rgba(paint(f));if(f.sphere){out.push(...window.softSphereMesh(f,c));continue;}for(let i=1;i<f.pts.length-1;i++)for(const p of [f.pts[0],f.pts[i],f.pts[i+1]])out.push(...p,...c);}return new Float32Array(out);}
  const fixed=gl.createBuffer(),dynamic=gl.createBuffer(),alpha=gl.createBuffer();let fixedCount=-1,fixedVertices=0,glass=[];
  function draw(buffer,data,usage){gl.bindBuffer(gl.ARRAY_BUFFER,buffer);if(data)gl.bufferData(gl.ARRAY_BUFFER,data,usage);gl.enableVertexAttribArray(locations.position);gl.vertexAttribPointer(locations.position,3,gl.FLOAT,false,28,0);gl.enableVertexAttribArray(locations.color);gl.vertexAttribPointer(locations.color,4,gl.FLOAT,false,28,12);gl.drawArrays(gl.TRIANGLES,0,data?data.length/7:fixedVertices);}
  return {render(geometry,count,cam,target,ctx,width,height,focal,colorize){

@@ -1,6 +1,6 @@
 // Walkable routes share the same furniture and floor boundaries as manual movement.
 window.createSeatWalker=({physics,chairs,person,dest,bounds,getSeat,onStart,onArrive,onCancel,onNotice})=>{
- const STEP=.20,SPEED=1.1;let route=null,target=-1,settling=-1,serial=0,completion=null,pose=0,departureSeat=-1;
+ const STEP=.20,SPEED=1.85;let route=null,target=-1,settling=-1,serial=0,completion=null,pose=0,departureSeat=-1;
  const inside=(x,z)=>bounds(x,z),floor=(x,z)=>physics.floor(x,z);
  function clear(a,b,ignore=-1){const n=Math.max(1,Math.ceil(Math.hypot(b.x-a.x,b.z-a.z)/.09));let y=a.y;for(let k=1;k<=n;k++){const t=k/n,x=a.x+(b.x-a.x)*t,z=a.z+(b.z-a.z)*t,h=floor(x,z);if(!inside(x,z)||Math.abs(h-y)>.64||physics.blocked(x,z,h,ignore))return false;y=h;}return true;}
  function plan(index){const seated=getSeat(),startSeat=seated>=0?seated:([departureSeat,target].find(i=>i>=0&&Math.hypot(chairs[i].x-person.x,chairs[i].z-person.z)<1.4)??-1);const chair=chairs[index];if(!chair)return null;const goal={x:chair.x,y:chair.y||0,z:chair.z-(chair.theta===undefined?.06:0)},candidates=[];
