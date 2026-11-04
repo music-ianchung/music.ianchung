@@ -3,7 +3,7 @@ window.createSeatWalker=({physics,chairs,person,dest,bounds,getSeat,onStart,onAr
  const STEP=.20,SPEED=1.85;let route=null,target=-1,settling=-1,serial=0,completion=null,pose=0,departureSeat=-1;
  const inside=(x,z)=>bounds(x,z),floor=(x,z)=>physics.floor(x,z);
  function clear(a,b,ignore=-1){const n=Math.max(1,Math.ceil(Math.hypot(b.x-a.x,b.z-a.z)/.09));let y=a.y;for(let k=1;k<=n;k++){const t=k/n,x=a.x+(b.x-a.x)*t,z=a.z+(b.z-a.z)*t,h=floor(x,z);if(!inside(x,z)||Math.abs(h-y)>.64||physics.blocked(x,z,h,ignore))return false;y=h;}return true;}
- function plan(index,point=null){const seated=getSeat(),startSeat=seated>=0?seated:([departureSeat,target].find(i=>i>=0&&Math.hypot(chairs[i].x-person.x,chairs[i].z-person.z)<1.4)??-1);const chair=point||chairs[index];if(!chair)return null;const goal={x:chair.x,y:chair.y||0,z:chair.z-(point?0:chair.theta===undefined?.06:0)},candidates=[];
+ function plan(index,point=null){const seated=getSeat(),startSeat=seated>=0?seated:([departureSeat,target].find(i=>i>=0&&Math.hypot(chairs[i].x-person.x,chairs[i].z-person.z)<1.4)??(physics.blocked(person.x,person.z,person.y)?chairs.findIndex(s=>Math.hypot(s.x-person.x,s.z-person.z)<.8):-1));const chair=point||chairs[index];if(!chair)return null;const goal={x:chair.x,y:chair.y||0,z:chair.z-(point?0:chair.theta===undefined?.06:0)},candidates=[];
   if(point&&inside(goal.x,goal.z)&&!physics.blocked(goal.x,goal.z,goal.y))candidates.push(goal);
   if(!point)for(const radius of [.70,.86,1.05])for(let i=0;i<24;i++){const a=i/24*Math.PI*2,x=goal.x+Math.sin(a)*radius,z=goal.z+Math.cos(a)*radius,p={x,y:floor(x,z),z};if(inside(x,z)&&!physics.blocked(x,z,p.y)&&clear(p,goal,index))candidates.push(p);}
   if(!candidates.length)return null;
