@@ -1,8 +1,9 @@
 // Smooth ellipsoids: continuous vertex lighting on GPU, analytic gradients on Canvas.
+const softSphereUnits=new Map();
 window.softSphereMesh=(shape,color)=>{
- const N=shape.detail||20,M=Math.round(N*.65),out=[],o=shape.pts[0],axes=shape.pts.slice(1).map(v=>v.map((n,i)=>n-o[i]));
- const vertex=(u,v)=>{const n=[Math.cos(u)*Math.cos(v),Math.sin(v),Math.sin(u)*Math.cos(v)],p=o.map((q,i)=>q+axes[0][i]*n[0]+axes[1][i]*n[1]+axes[2][i]*n[2]),light=.76+.24*Math.max(0,-n[0]*.35+n[1]*.72+n[2]*.45);return [...p,color[0]*light,color[1]*light,color[2]*light,color[3]];};
- for(let j=0;j<M;j++)for(let i=0;i<N;i++){const a=i/N*Math.PI*2,b=(i+1)/N*Math.PI*2,c=-Math.PI/2+j/M*Math.PI,d=-Math.PI/2+(j+1)/M*Math.PI;out.push(...vertex(a,c),...vertex(b,c),...vertex(b,d),...vertex(a,c),...vertex(b,d),...vertex(a,d));}return out;
+ const N=shape.detail||20,M=Math.round(N*.65),o=shape.pts[0],axes=shape.pts.slice(1).map(v=>v.map((n,i)=>n-o[i]));
+ if(!softSphereUnits.has(N)){const units=[],vertex=(u,v)=>{const n=[Math.cos(u)*Math.cos(v),Math.sin(v),Math.sin(u)*Math.cos(v)];units.push(...n,.76+.24*Math.max(0,-n[0]*.35+n[1]*.72+n[2]*.45));};for(let j=0;j<M;j++)for(let i=0;i<N;i++){const a=i/N*Math.PI*2,b=(i+1)/N*Math.PI*2,c=-Math.PI/2+j/M*Math.PI,d=-Math.PI/2+(j+1)/M*Math.PI;vertex(a,c);vertex(b,c);vertex(b,d);vertex(a,c);vertex(b,d);vertex(a,d);}softSphereUnits.set(N,units);}
+ const units=softSphereUnits.get(N),out=new Array(units.length/4*7);let k=0;for(let i=0;i<units.length;i+=4){const x=units[i],y=units[i+1],z=units[i+2],light=units[i+3];for(let j=0;j<3;j++)out[k++]=o[j]+axes[0][j]*x+axes[1][j]*y+axes[2][j]*z;out[k++]=color[0]*light;out[k++]=color[1]*light;out[k++]=color[2]*light;out[k++]=color[3];}return out;
 };
 window.drawSoftSphere=(shape,project,ctx,color=shape.col)=>{
  const p=project(shape.pts[0]);if(!p)return;const axes=shape.pts.slice(1).map(v=>project(v));if(axes.some(v=>!v))return;
