@@ -80,9 +80,10 @@
     document.querySelector('[data-candle="stage"]').textContent='물가에';
     document.querySelector('[data-rest="balcony"]').innerHTML='오로라 바라보기<small>물가에서, 조금 느리게</small>';
     document.querySelector('[data-rest="lean"]').innerHTML='유리창 옆 벤치<small>잎사귀 사이에서</small>';
+    const gazeButton=document.createElement('button');gazeButton.id='stargazeButton';gazeButton.textContent='☾ 누워서 별 보기';gazeButton.onclick=()=>window.greenhouseScene?.stargaze();$('restButton').before(gazeButton);const gazeRest=document.createElement('button');gazeRest.textContent='누워서 별 보기';gazeRest.onclick=()=>window.greenhouseScene?.stargaze();$('restPanel').append(gazeRest);
     $('stageExit').textContent='이 자리에서 조용히 마치기';
     $('instructions').querySelector('h2').textContent='별 아래, 나만의 자리.';
-    const paras=$('instructions').querySelectorAll('p');paras[0].textContent='드래그로 별과 오로라를 둘러보고, 방향키 또는 WASD로 걸어보세요. 테이블이나 의자를 누르면 자리에 앉아 헤드폰을 씁니다. 왼쪽 아래 「나만의 테이블」에서 가까운 자리를 고를 수도 있어요.';paras[1].textContent='테이블에서 카세트 음악, 밤숲, 파도, 빗소리, 고요를 선택하세요. 헤드폰을 벗으면 소리가 멈춥니다. 이곳은 각자의 기기에서 혼자 감상하는 공간이며, 다른 사람에게 소리가 전달되지 않아요.';paras[2].textContent='밤숲과 파도, 빗소리는 이 공간을 위해 합성한 자연 소리예요. 숨 고르기와 쉬는 자리도 편안하게 이용해보세요.';
+    const paras=$('instructions').querySelectorAll('p');paras[0].textContent='드래그로 별과 오로라를 둘러보고, 방향키 또는 WASD로 걸어보세요. 테이블이나 의자를 누르면 자리에 앉아 헤드폰을 씁니다. 왼쪽 아래 「나만의 테이블」에서 가까운 자리를 고를 수도 있어요.';paras[1].textContent='테이블에서 카세트 음악, 밤숲, 파도, 빗소리, 고요를 선택하세요. 헤드폰을 벗으면 소리가 멈춥니다. 이곳은 각자의 기기에서 혼자 감상하는 공간이며, 다른 사람에게 소리가 전달되지 않아요.';paras[2].textContent='밤숲과 파도, 빗소리는 이 공간을 위해 합성한 자연 소리예요. 「누워서 별 보기」를 누르면 아바타 없이 내 눈으로 밤하늘을 바라봐요. 음악은 계속 들을 수 있고, 「천천히 일어나기」 또는 Esc로 원래 자리로 돌아와요.';
   };
   const syncInert=()=>{panel.inert=!document.body.classList.contains('hasEntered')||document.body.classList.contains('arrivalActive')||document.body.classList.contains('ritualActive')||document.body.classList.contains('quiet');};
   new MutationObserver(syncInert).observe(document.body,{attributes:true,attributeFilter:['class']});syncInert();
