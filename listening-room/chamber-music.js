@@ -15,7 +15,7 @@
   const originalSetPlay = setPlay;
   const originalStopExternal = window.stopExternal;
   const originalMediaVolume = window.mediaVolume;
-  let recording = null, gap = 0, wantsPlay = false, last = performance.now();
+  let recording = null, gap = 0, wantsPlay = false, last = performance.now(), pendingSeek=null, applyingSync=false;
   sourceMode = 'chamber';
 
   function level() {
@@ -31,7 +31,7 @@
     const time = recording?.currentTime || 0;
     $('seek').max = duration;
     $('seek').value = time;
-    $('seek').disabled = false;
+    $('seek').disabled = !!window.roomPresence?.sharedMusic;
     $('duration').textContent = fmt(duration);
     $('elapsed').textContent = fmt(time);
   }
@@ -86,6 +86,7 @@
     current.onloadedmetadata = () => {
       if (recording !== current) return;
       if (Number.isFinite(current.duration)) recordings[track].duration = current.duration;
+      if(pendingSeek!==null){current.currentTime=Math.min(pendingSeek,current.duration||pendingSeek);pendingSeek=null;}
       renderTracks();
     };
     current.ontimeupdate = () => { if (recording === current) progress(); };
@@ -124,6 +125,7 @@
       $('title').hidden = false;
       return originalSetPlay(on);
     }
+    if(on&&window.roomPresence?.sharedMusic&&!applyingSync){const program=window.roomPresence.program();if(program){applyingSync=true;if(program.index!==track)selectTrack(program.index);pendingSeek=program.elapsed;gap=program.gap;applyingSync=false;}}
     wantsPlay = on;
     last = performance.now();
     initAudio();
@@ -135,6 +137,7 @@
     }
     if (gap > 0) { ui(true); return; }
     const current = recording || load();
+    if(pendingSeek!==null&&current.readyState>0){current.currentTime=pendingSeek;pendingSeek=null;}
     try {
       await current.play();
       if (recording === current && !wantsPlay) current.pause();
@@ -147,6 +150,7 @@
   };
 
   selectTrack = index => {
+    if(window.roomPresence?.sharedMusic&&!applyingSync){window.roomPresence.changeTrack((index+recordings.length)%recordings.length);return;}
     const resume = playing || externalPlaying;
     window.stopExternal();
     silence();
@@ -159,6 +163,7 @@
   };
   $('seek').oninput = event => {
     if (sourceMode !== 'chamber') { window.mediaSeek?.(+event.target.value); return; }
+    if(window.roomPresence?.sharedMusic){progress();return;}
     const resume = externalPlaying;
     recording ||= load();
     const target = +event.target.value;
@@ -184,9 +189,19 @@
     last = now;
     if (sourceMode === 'chamber' && externalPlaying && gap > 0) {
       gap -= delta;
-      if (gap <= 0) selectTrack(track + 1);
+      if (gap <= 0){if(window.roomPresence?.sharedMusic)window.recordingRoom.sync(window.roomPresence.program());else selectTrack(track + 1);}
     }
   }, 100);
+  window.recordingRoom={refresh:progress,sync(program){
+    if(!program||sourceMode!=='chamber')return;
+    const resume=wantsPlay||externalPlaying;applyingSync=true;pendingSeek=program.elapsed;
+    try{
+      if(program.index!==track)selectTrack(program.index);
+      if(program.gap>0){gap=program.gap;recording?.pause();window.musicRest=true;if(resume)ui(true);}
+      else{gap=0;window.musicRest=false;if(recording?.readyState>0){if(Math.abs(recording.currentTime-program.elapsed)>1.4)recording.currentTime=program.elapsed;pendingSeek=null;if(resume&&recording.paused)setPlay(true);}}
+      progress();
+    }finally{applyingSync=false;}
+  }};
   $('program').querySelector('h2').textContent = '연주 목록';
   $('program').lastElementChild.textContent = `${recordings.length}편의 연주 · 혼자 감상하는 공간`;
   renderTracks();
