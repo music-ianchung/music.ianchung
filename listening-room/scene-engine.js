@@ -76,3 +76,5 @@ window.setupHallZoom=canvas=>{
  canvas.addEventListener('wheel',e=>{if(!document.body.classList.contains('hasEntered'))return;e.preventDefault();window.hallZoom=Math.max(.65,Math.min(3,window.hallZoom*Math.exp(-e.deltaY*.0015)));},{passive:false});
  addEventListener('blur',()=>{touches.clear();pinching=false;});
 };
+
+window.floorTapPoint=(x,y,cam,width,height,focal,floor)=>{const xx=(x-width/2)/focal,yy=-(y-height/2)/focal,cp=Math.cos(cam.pitch),sp=Math.sin(cam.pitch),c=Math.cos(cam.yaw),s=Math.sin(cam.yaw),zz=cp-yy*sp,dy=yy*cp+sp,dx=xx*c+zz*s,dz=xx*s-zz*c;let prev=cam.y-floor(cam.x,cam.z);for(let t=.15;t<250;t+=.15){const px=cam.x+dx*t,pz=cam.z+dz*t,h=floor(px,pz),delta=cam.y+dy*t-h;if(prev>0&&delta<=0)return {x:px,y:h,z:pz};prev=delta;}return null;};
