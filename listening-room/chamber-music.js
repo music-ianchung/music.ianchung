@@ -192,7 +192,7 @@
       if (gap <= 0){if(window.roomPresence?.sharedMusic)window.recordingRoom.sync(window.roomPresence.program());else selectTrack(track + 1);}
     }
   }, 100);
-  window.recordingRoom={refresh:progress,sync(program){
+  window.recordingRoom={refresh:progress,async playPersonal(index){window.roomPresence?.listenAlone();await setPlay(false);selectTrack(index);await setPlay(true);return true;},sync(program){
     if(!program||sourceMode!=='chamber')return;
     const resume=wantsPlay||externalPlaying;applyingSync=true;pendingSeek=program.elapsed;
     try{

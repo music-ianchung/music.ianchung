@@ -69,6 +69,7 @@
     state.desk=index;state.headphones=true;setPlay(true);render();
   };
   $('deskOpen').onclick=()=>{const open=$('deskControls').hidden;$('deskControls').hidden=!open;$('deskOpen').setAttribute('aria-expanded',open);};
+  window.greenhousePlayPersonal=async index=>{if(state.desk<0&&!await window.greenhouseScene?.sitNearest())return false;state.headphones=true;selectTrack(index);await setPlay(true);render();return true;};
   $('nearestDesk').onclick=()=>window.greenhouseScene?.sitNearest();
   $('headphones').onclick=()=>{if(state.desk<0)return;state.headphones=!state.headphones;setPlay(state.headphones);render();};
   $('tapePlay').onclick=()=>setPlay(!(playing||externalPlaying));

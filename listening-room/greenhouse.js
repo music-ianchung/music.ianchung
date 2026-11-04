@@ -46,12 +46,14 @@ function avatar(t,visitor=null,append=false){
 const saved=visitor?{person:{...person},seat,moving}:null;if(visitor){Object.assign(person,{x:visitor.x,y:visitor.y,z:visitor.z,heading:visitor.heading});seat=visitor.seat;moving=visitor.moving;}remoteAvatarActive=!!visitor;
 if(!append)geo.length=worldGeometryCount;const start=geo.length,E=visitor?{...window.hallRitual,mood:visitor.mood,restPose:visitor.restPose,carriedCandle:false,gesture:visitor.gesture}:{...window.hallRitual,gesture:window.roomPresence?.ownGesture()},sitting=(seat>=0||(!visitor&&seatWalk.settling)||E?.restPose==='blanket')&&!moving;
 const stride=moving?Math.sin(t*.0065)*.07:0,bob=moving?Math.abs(Math.sin(t*.0065))*.015:Math.sin(t*.0017)*.008;
+const action=window.roomPresence?.actionPose(visitor);if(['tea','blanket'].includes(action?.kind))E.carriedCandle=false;
 const pose=visitor?(sitting?1:0):seatWalk.settling?seatWalk.pose:(sitting?1:0),torso=.81+.27*pose,head=1.36+.28*pose,cream='#f0e7d2',shadow='#d6c9aa',sage='#a8b8a0';
 // A soft little visitor: one round hood, one bean body, tiny mittens and feet.
 for(const [x,k] of [[-.145,1],[.145,-1]]){ellipsoid(x,.32+.40*pose,stride*k*(1-pose)-.16*pose,.105+.01*pose,.21-.105*pose,.115+.125*pose,cream);if(pose>.01)ellipsoid(x,.32+.16*pose,-.34*pose,.095*pose,.19*pose,.095*pose,cream);ellipsoid(x,.13+.14*pose,-.045-.345*pose+stride*k*(1-pose),.135-.005*pose,.09-.005*pose,.17-.01*pose,shadow);}
 ellipsoid(0,torso+bob,.025,.32,.34,.26,cream);
 ellipsoid(0,torso-.19+bob,.025,.31,.18,.255,cream);
-for(const [x,k] of [[-.36,1],[.36,-1]]){const held=k===1&&E?.carriedCandle,y=k===-1&&E?.gesture==='wave'?torso+.25+Math.sin(t*.008)*.06:held?.94:torso-.08+bob,z=held?-.07:-stride*k*.55;ellipsoid(x,y,z,.105,.185,.115,cream);ellipsoid(x,y-.125,z-.035,.10,.105,.105,cream);}
+window.drawComfortArms?.({ellipsoid,face,torso,head,bob,stride,E,action,t});
+const headStart=geo.length;
 ellipsoid(0,head+bob,.015,.435,.40,.365,cream);
 // Small round ears read as a cozy hood, including from behind.
 for(const x of [-.30,.30]){ellipsoid(x,head+.29+bob,.025,.115,.13,.105,cream);ellipsoid(x,head+.30+bob,-.065,.054,.065,.025,'#dfcfb5');}
@@ -59,19 +61,20 @@ ellipsoid(0,head-.035+bob,-.285,.315,.245,.115,'#fff2dc');
 for(const x of [-.105,.105])ellipsoid(x,head-.005+bob,-.397,.027,.034,.018,'#51483e');
 for(const x of [-.19,.19])ellipsoid(x,head-.085+bob,-.378,.052,.028,.014,'#dcae9d');
 ellipsoid(0,head-.085+bob,-.403,.021,.014,.012,'#8a7260');
+if(action?.kind==='nod'||action?.kind==='tea'){const p=action.progress,angle=action.kind==='nod'?-(Math.sin(p*Math.PI*2)**2)*.16*Math.sin(p*Math.PI):-Math.sin(p*Math.PI)*.10;for(let i=headStart;i<geo.length;i++)geo[i].pts=geo[i].pts.map(([x,y,z])=>{const yy=y-(head-.24);return[x,head-.24+yy*Math.cos(angle)-z*Math.sin(angle),yy*Math.sin(angle)+z*Math.cos(angle)];});}
 ellipsoid(0,torso+.25+bob,-.005,.295,.07,.265,sage);
 ellipsoid(.12,torso+.10+bob,-.245,.065,.16,.045,sage);
-if(E?.restPose==='blanket'&&!moving){ellipsoid(0,.87,-.20,.37,.13,.34,'#b8bca6');face([[-.36,.90,-.20],[.36,.90,-.20],[.36,.35,-.48],[-.36,.35,-.48]],'#b8bca6');face([[-.36,.90,-.20],[-.36,.35,-.48],[-.38,.36,.08],[-.36,.88,.14]],'#a3aa92');face([[.36,.90,-.20],[.36,.35,-.48],[.38,.36,.08],[.36,.88,.14]],'#cbd0ba');}
+if(E?.restPose==='blanket'&&!moving)window.drawComfortBlanket?.({face,action});
 if(E?.carriedCandle)box(-.43,.82,-.07,.12,.22,.12,['#ac956b','#806d4a','#e5d0a0']);
 if(E?.restPose==='lean'&&!moving)for(let i=start;i<geo.length;i++)geo[i].pts=geo[i].pts.map(([x,y,z])=>[x,y,z+Math.max(0,y-.2)*.12]);
 if(E?.mood){const px=.45,py=torso-.12+bob,pz=-.05,settled=E.settled;if(E.mood==='stone'){ellipsoid(px,py,pz,.11,.085,.095,'#8c887b');if(settled)ellipsoid(px,py+.065,pz,.09,.035,.075,'#83a16a');}else if(E.mood==='water')ellipsoid(px,py,pz,.10,.085,.085,settled?'#bfd9cf':'#84a8a1');else if(E.mood==='leaf')face([[px-.08,py,pz],[px,py+.15,pz],[px+.08,py,pz],[px,py-.05,pz+.025]],settled?'#b3c88b':'#b49e66');else for(let k=0;k<4;k++)ellipsoid(px+Math.sin(k*2)*.05,py+k*.02,pz+Math.cos(k*2)*.03,settled?.06:.08,.021,.03,settled?'#dec89c':'#a48b6e');}
 if(visitor?visitor.headphones:window.greenhouseListening?.headphones){for(const x of [-.43,.43])ellipsoid(x,head-.02+bob,.015,.085,.14,.11,'#303e3b');for(let j=0;j<12;j++){let a=j/12*Math.PI,b=(j+1)/12*Math.PI;face([[Math.cos(a)*.46,head+.04+bob+Math.sin(a)*.39,.015],[Math.cos(b)*.46,head+.04+bob+Math.sin(b)*.39,.015],[Math.cos(b)*.49,head+.04+bob+Math.sin(b)*.42,.015],[Math.cos(a)*.49,head+.04+bob+Math.sin(a)*.42,.015]],'#52665e');}}
-const co=Math.cos(person.heading),si=Math.sin(person.heading);for(let i=start;i<geo.length;i++){geo[i].pts=geo[i].pts.map(([x,y,z])=>[person.x+x*co-z*si,y+person.y,person.z+x*si+z*co]);geo[i].hero=true;}
+const facing=window.comfortFacing?.(person.heading,action,moving)??person.heading,co=Math.cos(facing),si=Math.sin(facing);for(let i=start;i<geo.length;i++){geo[i].pts=geo[i].pts.map(([x,y,z])=>[person.x+x*co-z*si,y+person.y,person.z+x*si+z*co]);geo[i].hero=true;}
 if(saved){Object.assign(person,saved.person);seat=saved.seat;moving=saved.moving;}remoteAvatarActive=false;
 }
 
 function personalCandleGeometry(){let c=window.hallRitual?.candle;if(!c)return;if(Date.now()-c.created>1200000){window.hallRitual.candle=null;return;}let start=geo.length;box(c.x,c.y,c.z,.16,.26,.16,['#bda97c','#948057','#e2c797']);box(c.x,c.y+.26,c.z,.012,.05,.012,'#705331');for(let i=start;i<geo.length;i++)geo[i].hero=true;}
-function personalLight(t){let E=window.hallRitual;if(!E)return;let c=E.candle;if(!c&&E.carriedCandle){let co=Math.cos(person.heading),si=Math.sin(person.heading);c={x:person.x-.43*co+.07*si,y:person.y+1.07,z:person.z-.43*si-.07*co,held:true};}if(!c)return;let xyz=[c.x,c.y+(c.held?0:.31),c.z],p=point(xyz);if(!p)return;X.save();X.globalCompositeOperation='screen';let power=.24+(E.blessing||0)*.35;glow(xyz,1.0,power);let r=Math.max(1,.04*focal/p.d);X.fillStyle='#ffe7b2';X.beginPath();X.ellipse(p.x,p.y,r*.65,r*2.1*(1+Math.sin(t*.003)*.12),0,0,Math.PI*2);X.fill();X.restore();}
+function personalLight(t){let E=window.hallRitual;if(!E)return;let c=E.candle;if(!c&&E.carriedCandle&&!['tea','blanket'].includes(window.roomPresence?.ownGesture())){let co=Math.cos(person.heading),si=Math.sin(person.heading);c={x:person.x-.43*co+.07*si,y:person.y+1.07,z:person.z-.43*si-.07*co,held:true};}if(!c)return;let xyz=[c.x,c.y+(c.held?0:.31),c.z],p=point(xyz);if(!p)return;X.save();X.globalCompositeOperation='screen';let power=.24+(E.blessing||0)*.35;glow(xyz,1.0,power);let r=Math.max(1,.04*focal/p.d);X.fillStyle='#ffe7b2';X.beginPath();X.ellipse(p.x,p.y,r*.65,r*2.1*(1+Math.sin(t*.003)*.12),0,0,Math.PI*2);X.fill();X.restore();}
 
 const starField=Array.from({length:720},(_,i)=>{let a=i*2.399963,y=.12+(Math.sin(i*91.31)*.5+.5)*1.35,r=180;return [Math.cos(a)*Math.cos(y)*r,Math.sin(y)*r,Math.sin(a)*Math.cos(y)*r];});
 const slow=matchMedia('(prefers-reduced-motion: reduce)').matches;

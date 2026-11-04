@@ -9,7 +9,7 @@
   nicknameBox.innerHTML='<label for="visitorName">이곳에서 불릴 이름</label><input id="visitorName" maxlength="12" autocomplete="off" spellcheck="false" placeholder="닉네임 · 1~12자"><p id="nicknameMessage" role="status">함께 있는 사람들에게 이 이름이 보여요.</p><button id="soloEntry" hidden>지금은 혼자 들어갈게요</button>';
   $('tuning').parentNode.insertBefore(nicknameBox,$('tuning'));$('visitorName').value=nick;
   const bar=document.createElement('aside');bar.id='presenceBar';bar.setAttribute('aria-label','함께 머무는 사람들');
-  bar.innerHTML='<button id="peopleToggle" aria-expanded="false">함께 머무는 중</button><div id="peoplePanel" hidden><strong>같은 공간에 머무는 이름들</strong><ul id="peopleList"></ul><p id="presenceNote" role="status"></p></div><button id="freeSeat" aria-label="가까운 빈자리에 앉기">빈자리</button><div class="quietGestures" role="group" aria-label="조용한 인사"><button data-greet="wave" aria-label="손인사">👋</button><button data-greet="nod" aria-label="고개 끄덕이기">⌒</button><button data-greet="heart" aria-label="따뜻한 마음 보내기">♡</button></div>';
+  bar.innerHTML='<button id="peopleToggle" aria-expanded="false">함께 머무는 중</button><div id="peoplePanel" hidden><strong>같은 공간에 머무는 이름들</strong><ul id="peopleList"></ul><p id="presenceNote" role="status"></p></div><button id="freeSeat" aria-label="가까운 빈자리에 앉기">빈자리</button><div class="quietGestures" role="group" aria-label="조용한 인사"><button data-greet="wave" aria-label="손인사">손인사</button><button data-greet="nod" aria-label="고개 끄덕이기">끄덕임</button></div>';
   if(hall!=='greenhouse')bar.insertAdjacentHTML('beforeend','<button id="sharedListening" aria-pressed="true">함께 듣기</button>');
   document.body.append(bar);
   function notice(text){$('toast').textContent=text;$('toast').style.opacity=1;clearTimeout(notice.timer);notice.timer=setTimeout(()=>$('toast').style.opacity=0,3500);}
@@ -18,9 +18,10 @@
     const online=connection==='online';
     $('peopleToggle').textContent=online?`함께 ${people.length}명`:solo?'혼자 머무는 중':connection==='connecting'?'연결하는 중…':'다시 연결하는 중…';
     $('presenceNote').textContent=online?(hall==='greenhouse'?'소리는 각자의 헤드폰에서만 들려요.':'함께 듣기에서는 곡 전환이 모두에게 적용돼요. 일시정지는 나에게만 적용됩니다.'):'연결이 돌아오면 다른 분들의 모습이 다시 보여요.';
-    $('peopleList').replaceChildren();
-    for(const person of people){const li=document.createElement('li');li.textContent=person.nick+(person.id===id?' · 나':'')+(person.seat!==null?' · '+(person.seat+1)+'번':'');$('peopleList').append(li);}
-    document.querySelectorAll('[data-greet]').forEach(b=>b.disabled=!online);
+    const signature=JSON.stringify(people.map(p=>[p.id,p.nick,p.seat]));if($('peopleList').dataset.signature!==signature){$('peopleList').dataset.signature=signature;$('peopleList').replaceChildren();
+    for(const person of people){const li=document.createElement('li'),name=document.createElement('span');name.textContent=person.nick+(person.id===id?' · 나':'')+(person.seat!==null?' · '+(person.seat+1)+'번':'');li.append(name);if(person.id!==id){const wave=document.createElement('button');wave.textContent='인사';wave.setAttribute('aria-label',person.nick+'님께 손인사');wave.onclick=()=>room.act('wave',person.id);const rec=document.createElement('button');rec.textContent='추천 부탁';rec.setAttribute('aria-label',person.nick+'님께 곡 추천 부탁하기');rec.onclick=async()=>{try{await room.recommend('recommend_request',{recipient:person.id});notice('조용히 곡 추천을 부탁했어요.');}catch{}};li.append(wave,rec);}$('peopleList').append(li);}}
+
+    document.querySelectorAll('[data-greet]').forEach(b=>b.disabled=false);
     if(hall!=='greenhouse')$('program').lastElementChild.textContent=(hall==='chamber'?'2':'3')+'편의 연주 · '+(online?'같은 공간에 함께':'혼자 감상하는 공간');
     if($('sharedListening')){$('sharedListening').setAttribute('aria-pressed',online&&shared);$('sharedListening').textContent=online&&shared?'함께 듣기':'혼자 듣기';}
   }
@@ -39,7 +40,7 @@
     for(const person of people){if(person.id===id)continue;active.add(person.id);const before=peers.get(person.id);const target={...person,seat:person.seat??-1,moving:!!person.moving,restPose:person.rest,headphones:!!person.headphones};if(before)Object.assign(before.target,target);else peers.set(person.id,{x:person.x,y:person.y,z:person.z,heading:person.heading,target});}
     for(const key of peers.keys())if(!active.has(key))peers.delete(key);
     if(data.program){programState=data.program;lastProgramAt=performance.now();if(shared)window.recordingRoom?.sync(currentProgram());}
-    ui();
+    ui();window.dispatchEvent(new CustomEvent('roomSnapshot',{detail:{...data,selfId:id}}));
   }
   function currentProgram(){
     if(!programState)return null;
@@ -68,20 +69,25 @@
     id=null;secret='';people=[];peers.clear();connection='idle';try{sessionStorage.removeItem('listening-room-guest');}catch{}
   }
   const room=window.roomPresence={
-    get nickname(){return nick||'나';},get connected(){return connection==='online'&&!solo;},get sharedMusic(){return shared&&connection==='online'&&!solo;},
+    get id(){return id;},ownState(){return {...local};},get nickname(){return nick||'나';},get connected(){return connection==='online'&&!solo;},get sharedMusic(){return shared&&connection==='online'&&!solo;},
     program:currentProgram,
     frame(person,seat,moving){local={x:person.x,y:person.y,z:person.z,heading:person.heading,seat,moving};},
-    peers(){const now=performance.now(),dt=Math.min(.2,(now-lastFrame)/1000);lastFrame=now;const blend=1-Math.exp(-dt*7);return [...peers.values()].map(p=>{for(const key of ['x','y','z'])p[key]+=(p.target[key]-p[key])*blend;const delta=Math.atan2(Math.sin(p.target.heading-p.heading),Math.cos(p.target.heading-p.heading));p.heading+=delta*blend;return {...p.target,x:p.x,y:p.y,z:p.z,heading:p.heading,gesture:p.target.gesture_until>Date.now()-offset?p.target.gesture:null};}).sort((a,b)=>Math.hypot(a.x-local.x,a.z-local.z)-Math.hypot(b.x-local.x,b.z-local.z)).slice(0,12);},
+    peers(){const now=performance.now(),dt=Math.min(.2,(now-lastFrame)/1000);lastFrame=now;const blend=1-Math.exp(-dt*7);return [...peers.values()].map(p=>{for(const key of ['x','y','z'])p[key]+=(p.target[key]-p[key])*blend;const delta=Math.atan2(Math.sin(p.target.heading-p.heading),Math.cos(p.target.heading-p.heading));p.heading+=delta*blend;return {...p.target,x:p.x,y:p.y,z:p.z,heading:p.heading,gesture:p.target.gesture_until>Date.now()-offset?p.target.gesture:null,gestureProgress:Math.max(0,Math.min(1,1-(p.target.gesture_until-(Date.now()-offset))/(p.target.gesture==='tea'?12000:p.target.gesture==='blanket'?6000:4000))),gestureHeading:p.target.gesture_heading};}).sort((a,b)=>Math.hypot(a.x-local.x,a.z-local.z)-Math.hypot(b.x-local.x,b.z-local.z)).slice(0,12);},
     occupiedSeat(index){return people.find(p=>p.id!==id&&p.seat===index);},
     async claimSeat(index){if(solo||!id)return true;try{receive(await command('heartbeat',()=>({state:{...state(),seat:index}})));local.seat=index;return true;}catch(error){notice(error.message);return false;}},
     ownGesture(){return ownReaction?.until>Date.now()?ownReaction.kind:null;},
-    paintLabels(point,ctx){ctx.save();ctx.textAlign='center';ctx.font='10px sans-serif';for(const person of people){if(person.id===id)continue;const smooth=peers.get(person.id),p=point([(smooth?.x??person.x),(smooth?.y??person.y)+2.25,(smooth?.z??person.z)]);if(!p)continue;ctx.fillStyle='#e3e5ce';ctx.shadowColor='#071713';ctx.shadowBlur=4;ctx.fillText(person.nick,p.x,p.y);if(person.gesture_until>Date.now()-offset){ctx.font='18px sans-serif';ctx.fillText({wave:'👋',nod:'⌒',heart:'♡'}[person.gesture]||'',p.x,p.y-20);ctx.font='10px sans-serif';}}const own=room.ownGesture(),self=point([local.x,local.y+2.65,local.z]);if(own&&self){ctx.font='20px sans-serif';ctx.fillText({wave:'👋',nod:'⌒',heart:'♡'}[own],self.x,self.y);}ctx.restore();},
+    actionPose(visitor){if(visitor)return {kind:visitor.gesture,progress:visitor.gestureProgress||0,heading:visitor.gestureHeading};if(!room.ownGesture())return null;return {kind:ownReaction.kind,progress:1-(ownReaction.until-Date.now())/ownReaction.duration,heading:ownReaction.heading};},
+    async act(kind,target){const duration=kind==='tea'?12000:kind==='blanket'?6000:4000;if(room.connected){try{const data=await command('gesture',()=>({gesture:kind,target,state:state()}));receive(data);const self=data.people.find(p=>p.id===id);ownReaction={kind,duration,until:Date.now()+Math.max(0,(self?.gesture_until||data.serverNow+duration)-data.serverNow),heading:self?.gesture_heading??local.heading};return true;}catch(error){notice(error.message);return false;}}ownReaction={kind,duration,until:Date.now()+duration,heading:local.heading};return true;},
+    async recommend(kind,extra){try{const data=await command(kind,extra);receive(data);return data;}catch(error){notice(error.message);throw error;}},
+    listenAlone(){shared=false;ui();window.recordingRoom?.refresh();},
+    async listenRecommended(index){room.listenAlone();return hall==='greenhouse'?window.greenhousePlayPersonal?.(index):window.recordingRoom?.playPersonal(index);},
+    paintLabels(point,ctx){ctx.save();ctx.textAlign='center';ctx.font='10px sans-serif';for(const person of people){if(person.id===id)continue;const smooth=peers.get(person.id),p=point([(smooth?.x??person.x),(smooth?.y??person.y)+2.25,(smooth?.z??person.z)]);if(!p)continue;ctx.fillStyle='#e3e5ce';ctx.shadowColor='#071713';ctx.shadowBlur=4;ctx.fillText(person.nick,p.x,p.y);}ctx.restore();},
     paintSeats(ctx,hits){ctx.save();ctx.strokeStyle='#dabd83';ctx.fillStyle='#dabd83';for(const hit of hits){if(!room.occupiedSeat(hit.i))continue;ctx.beginPath();ctx.arc(hit.x,hit.y,Math.min(6,hit.r*.28),0,Math.PI*2);ctx.stroke();}ctx.restore();},
     async changeTrack(index){if(!room.sharedMusic)return false;try{receive(await command('music',{index}));}catch(error){notice(error.message);}return true;}
   };
   $('freeSeat').onclick=()=>window.roomSeatNearest?.();
-  $('peopleToggle').onclick=()=>{const show=$('peoplePanel').hidden;$('peoplePanel').hidden=!show;$('peopleToggle').setAttribute('aria-expanded',show);};
-  document.querySelectorAll('[data-greet]').forEach(button=>button.onclick=async()=>{if(!room.connected)return;try{receive(await command('gesture',()=>({gesture:button.dataset.greet,state:state()})));ownReaction={kind:button.dataset.greet,until:Date.now()+4000};}catch(error){notice(error.message);}});
+  $('peopleToggle').onclick=()=>{const show=$('peoplePanel').hidden;$('peoplePanel').hidden=!show;$('peopleToggle').setAttribute('aria-expanded',show);if(show&&$('recommendPanel')){$('recommendPanel').hidden=true;$('recommendToggle').setAttribute('aria-expanded','false');}};
+  document.querySelectorAll('[data-greet]').forEach(button=>button.onclick=()=>room.act(button.dataset.greet));
   if($('sharedListening'))$('sharedListening').onclick=()=>{shared=!shared;if(shared)window.recordingRoom?.sync(currentProgram());window.recordingRoom?.refresh();ui();};
   for(const field of ['musicform','musicfile'])$(field).addEventListener(field==='musicform'?'submit':'change',()=>{shared=false;ui();});
   const setup=window.setupRituals;
