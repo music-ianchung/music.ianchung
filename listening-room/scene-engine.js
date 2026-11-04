@@ -63,3 +63,16 @@ window.createHallCameraRig=(physics,initial)=>{
   return {...goal,x:from.x+dx*ratio,y:from.y+dy*ratio,z:from.z+dz*ratio};
  }};
 };
+
+// Pinch only the scene, leaving interface controls and browser accessibility intact.
+window.setupHallZoom=canvas=>{
+ const touches=new Map();let pinching=false,startDistance=0,startZoom=1;window.hallZoom=1;
+ const distance=()=>{const p=[...touches.values()];return Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y);};
+ const consume=e=>{e.preventDefault();e.stopImmediatePropagation();};
+ canvas.addEventListener('pointerdown',e=>{if(e.pointerType!=='touch')return;touches.set(e.pointerId,{x:e.clientX,y:e.clientY});if(touches.size>=2){if(!pinching){pinching=true;startDistance=Math.max(1,distance());startZoom=window.hallZoom;canvas.dispatchEvent(new PointerEvent('pointercancel',{pointerId:-1}));}canvas.setPointerCapture(e.pointerId);consume(e);}else if(pinching)consume(e);},true);
+ canvas.addEventListener('pointermove',e=>{if(touches.has(e.pointerId))touches.set(e.pointerId,{x:e.clientX,y:e.clientY});if(!pinching)return;if(touches.size>=2)window.hallZoom=Math.max(.65,Math.min(3,startZoom*distance()/startDistance));consume(e);},true);
+ const end=e=>{if(e.pointerId===-1)return;touches.delete(e.pointerId);if(pinching){consume(e);if(!touches.size)pinching=false;}};
+ canvas.addEventListener('pointerup',end,true);canvas.addEventListener('pointercancel',end,true);
+ canvas.addEventListener('wheel',e=>{if(!document.body.classList.contains('hasEntered'))return;e.preventDefault();window.hallZoom=Math.max(.65,Math.min(3,window.hallZoom*Math.exp(-e.deltaY*.0015)));},{passive:false});
+ addEventListener('blur',()=>{touches.clear();pinching=false;});
+};
