@@ -1,6 +1,8 @@
 /* Local translations only. Visitor names, messages and audio are never sent for translation. */
 (()=>{
 const dictionary={
+ "리듬 타기":"Feel the groove",
+ "리듬 쉬기":"Rest the groove",
  "잠시, 음악": "A Moment, in Music",
  "체임버홀": "Chamber Hall",
  "빈야드홀": "Vineyard Hall",
@@ -464,7 +466,7 @@ window.roomI18n={t,get language(){return language;},setLanguage,suggestName,serv
 document.documentElement.lang=language;document.documentElement.dataset.language=language;
 function mount(){
  const nav=document.createElement('nav');nav.id='languageSwitch';nav.setAttribute('aria-label','Language / 언어');nav.innerHTML='<button type="button" data-language="ko" lang="ko" aria-label="한국어로 보기">한국어</button><span aria-hidden="true">/</span><button type="button" data-language="en" lang="en" aria-label="View in English">EN</button>';
- document.body.append(nav);nav.querySelectorAll('button').forEach(b=>b.onclick=()=>setLanguage(b.dataset.language));refresh();
+ const pickerTop=document.querySelector('#roomPicker .pickerTop'),host=pickerTop||document.querySelector('header .topright')||document.body;if(pickerTop)host.insertBefore(nav,host.querySelector('.pickerHome'));else host.append(nav);nav.querySelectorAll('button').forEach(b=>b.onclick=()=>setLanguage(b.dataset.language));refresh();
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
 })();
