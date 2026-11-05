@@ -1,5 +1,5 @@
 (()=>{
- const hall=new URLSearchParams(location.search).get('hall'),count=hall==='chamber'||!hall?2:3;
+ const hall=new URLSearchParams(location.search).get('hall'),count=hall==='chamber'||!hall?2:hall==='jazzbar'?4:3;
  const radio=hall==='greenhouse',radioNames=['클래식','팝','뉴에이지'],itemName=index=>radio?radioNames[index]+' 라디오':'연주 '+String(index+1).padStart(2,'0')+'번';
  const toggle=document.createElement('button');toggle.id='recommendToggle';toggle.textContent='추천 쪽지';toggle.setAttribute('aria-expanded','false');$('presenceBar').append(toggle);
  const panel=document.createElement('aside');panel.id='recommendPanel';panel.hidden=true;panel.setAttribute('aria-label','곡 추천 쪽지');
@@ -28,4 +28,5 @@
  toggle.onclick=()=>{panel.hidden=!panel.hidden;if(!panel.hidden){$('peoplePanel').hidden=true;$('peopleToggle').setAttribute('aria-expanded','false');if($('comfortPanel'))$('comfortPanel').hidden=true;}toggle.setAttribute('aria-expanded',!panel.hidden);};$('closeRecommendations').onclick=()=>{panel.hidden=true;toggle.setAttribute('aria-expanded','false');};
  new MutationObserver(()=>{if(document.body.classList.contains('quiet')||document.body.classList.contains('ritualActive')||document.body.classList.contains('stargazing')){panel.hidden=true;toggle.setAttribute('aria-expanded','false');}}).observe(document.body,{attributes:true,attributeFilter:['class']});render();
 })();
+
 

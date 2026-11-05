@@ -1,8 +1,8 @@
 (() => {
-  const hall=['vineyard','greenhouse'].includes(new URLSearchParams(location.search).get('hall'))?new URLSearchParams(location.search).get('hall'):'chamber';
+  const hall=['vineyard','greenhouse','jazzbar'].includes(new URLSearchParams(location.search).get('hall'))?new URLSearchParams(location.search).get('hall'):'chamber';
   const endpoint=location.hostname==='terminal.local'?location.origin+'/api/presence':'https://ian-listening-room-together.delap.chatgpt.site/api/presence';
   let id=null,secret='',nick='',connection='idle',solo=false,pollTimer=null,joining=false,ownReaction=null;
-  let local={x:0,y:0,z:hall==='greenhouse'?36:13,heading:0,seat:-1,moving:false},people=[],programState=null,offset=0,lastProgramAt=0;
+  let local={x:0,y:0,z:hall==='greenhouse'?36:hall==='jazzbar'?20:13,heading:0,seat:-1,moving:false},people=[],programState=null,offset=0,lastProgramAt=0;
   const peers=new Map();let queue=Promise.resolve(),shared=hall!=='greenhouse',lastFrame=performance.now();
   try{secret=sessionStorage.getItem('listening-room-guest')||'';}catch{}
   const nicknameBox=document.createElement('div');nicknameBox.id='nicknameBox';
@@ -31,7 +31,7 @@
     for(const person of people){const li=document.createElement('li'),name=document.createElement('span');name.dataset.i18nSkip='';name.textContent=person.nick+(person.id===id?(window.roomI18n?.language==='en'?' · me':' · 나'):'')+(person.seat!==null?' · '+(window.roomI18n?.language==='en'?'seat ':'')+(person.seat+1)+(window.roomI18n?.language==='en'?'':'번'):'');li.append(name);if(person.id!==id){const wave=document.createElement('button');wave.textContent='인사';wave.setAttribute('aria-label',person.nick+'님께 손인사');wave.onclick=()=>room.act('wave',person.id);const rec=document.createElement('button');rec.textContent='추천 부탁';rec.setAttribute('aria-label',person.nick+'님께 곡 추천 부탁하기');rec.onclick=async()=>{try{await room.recommend('recommend_request',{recipient:person.id});notice('조용히 곡 추천을 부탁했어요.');}catch{}};li.append(wave,rec);}$('peopleList').append(li);}}
 
     document.querySelectorAll('[data-greet]').forEach(b=>b.disabled=false);
-    if(hall!=='greenhouse')$('program').lastElementChild.textContent=(hall==='chamber'?'2':'3')+'편의 연주 · '+(online?'같은 공간에 함께':'혼자 감상하는 공간');
+    if(hall!=='greenhouse')$('program').lastElementChild.textContent=(hall==='chamber'?'2':hall==='jazzbar'?'4':'3')+'편의 연주 · '+(online?'같은 공간에 함께':'혼자 감상하는 공간');
     if($('sharedListening')){$('sharedListening').setAttribute('aria-pressed',online&&shared);$('sharedListening').textContent=online&&shared?'함께 듣기':'혼자 듣기';}
   }
   async function request(kind,extra={}){
@@ -53,7 +53,7 @@
   }
   function currentProgram(){
     if(!programState)return null;
-    const durations=hall==='chamber'?[319.013,319.613]:[319.573,319.253,319.693];
+    const durations=hall==='chamber'?[319.013,319.613]:hall==='jazzbar'?[199.6,193.56,149.76,238.8]:[319.573,319.253,319.693];
     let index=programState.index,time=programState.gap>0?durations[index]+8-programState.gap:programState.elapsed;
     time+=(performance.now()-lastProgramAt)/1000;
     while(time>=durations[index]+8){time-=durations[index]+8;index=(index+1)%durations.length;}

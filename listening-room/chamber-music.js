@@ -1,7 +1,7 @@
 // The chamber recordings have no displayed track titles.
 (() => {
   const hall=new URLSearchParams(location.search).get('hall');
-  if (hall==='greenhouse') return;
+  if (['greenhouse','jazzbar'].includes(hall)) return;
   const roomName=hall==='vineyard'?'빈야드홀':'체임버홀';
 
   const recordings = hall==='vineyard' ? [
@@ -208,3 +208,4 @@
   $('program').lastElementChild.textContent = `${recordings.length}편의 연주 · 혼자 감상하는 공간`;
   renderTracks();
 })();
+

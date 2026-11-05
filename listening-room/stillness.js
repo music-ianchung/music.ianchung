@@ -1,6 +1,6 @@
 (()=>{
 const E=window.hallRitual;E.carriedCandle=true;E.candle=null;E.placingCandle=false;E.restPose=null;E.distanceGain=1;E.blessing=0;
-const requestedHall=new URLSearchParams(location.search).get('hall'),hall=['vineyard','greenhouse'].includes(requestedHall)?requestedHall:'chamber',key='listening-room-candle-'+hall;
+const requestedHall=new URLSearchParams(location.search).get('hall'),hall=['vineyard','greenhouse','jazzbar'].includes(requestedHall)?requestedHall:'chamber',key='listening-room-candle-'+hall;
 try{let c=JSON.parse(localStorage.getItem(key));if(c&&Number.isFinite(c.x)&&Number.isFinite(c.y)&&Number.isFinite(c.z)&&Date.now()-c.created<20*60*1000){E.candle=c;E.carriedCandle=false;}}catch{}
 window.applyRoomVolume=()=>{let v=+$('volume').value/100*(E.duck??1)*(E.distanceGain??1);if(audio&&master)master.gain.setTargetAtTime(v,audio.currentTime,.7);window.mediaVolume?.(v);};
 window.onCandlePlaced=c=>{if(!c)return;E.candle={...c,created:Date.now()};E.carriedCandle=false;E.placingCandle=false;document.body.classList.remove('placingCandle');$('candlePanel').hidden=true;$('candleButton').textContent='♧ 내 빛 옮기기';try{localStorage.setItem(key,JSON.stringify(E.candle));}catch{} };
@@ -22,3 +22,4 @@ for(let z=-1;z<24;z+=3.5){if(z>=cameraZ-.3)continue;for(let s of [-1,1]){quad([[
 let opening=Math.max(0,(p-.44)/.56),leaf=dw*.5*(1-opening);cx.fillStyle='#17120eef';cx.fillRect(tl.x,tl.y,leaf,dh);cx.fillRect(br.x-leaf,tl.y,leaf,dh);cx.strokeStyle='#756340';cx.lineWidth=2;cx.strokeRect(tl.x,tl.y,dw,dh);let vig=cx.createRadialGradient(w/2,h*.45,h*.15,w/2,h*.5,Math.max(w,h)*.7);vig.addColorStop(0,'#00000000');vig.addColorStop(1,'#000000bb');cx.fillStyle=vig;cx.fillRect(0,0,w,h);if(p>=1){complete();return;}requestAnimationFrame(draw);}requestAnimationFrame(draw);}
 window.setupRituals=()=>{originalSetup();let enter=$('enter').onclick;$('enter').onclick=()=>{if($('enter').disabled)return;enter();arrival();};const curtain=$('curtainButton').onclick;$('curtainButton').onclick=()=>{if(E.phase!=='listening')return;panelsClose();$('exitChoice').showModal();};$('stageExit').onclick=()=>{$('exitChoice').close();$('farewell').classList.remove('quietFarewell');window.beginCurtain(false);};$('quietExit').onclick=()=>{$('exitChoice').close();$('farewell').classList.add('quietFarewell');window.beginCurtain(true);};$('closeExit').onclick=()=>$('exitChoice').close();if(E.candle)$('candleButton').textContent='♧ 내 빛 옮기기';};
 })();
+

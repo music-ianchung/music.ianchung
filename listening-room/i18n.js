@@ -340,7 +340,37 @@ const dictionary={
  "테이블에 앉아 클래식·팝·뉴에이지·컨트리·포크·재즈·캐롤 중 하나를 누르면 해외 라디오가 재생돼요. 헤드폰을 벗으면 음악이 멈추고 작은 밤 공기와 풀벌레 소리가 남아요. 이곳은 각자의 기기에서 혼자 감상하는 공간이며, 다른 사람에게 소리가 전달되지 않아요.": "Take a seat and choose Classical, Pop, New Age, Country, Folk, Jazz or Christmas to listen to live radio. Taking off your headphones stops the music, leaving a little night air and crickets. Each visitor listens privately on their own device.",
  "라디오는 각 방송국의 실시간 편성이며 광고나 안내가 포함될 수 있어요. 밤 공기와 풀벌레 소리는 작게 합성해 흐릅니다. 「누워서 별 보기」를 누르면 아바타 없이 내 눈으로 밤하늘을 바라봐요. 음악은 계속 들을 수 있고, 「천천히 일어나기」 또는 Esc로 원래 자리로 돌아와요.": "Radio stations follow their own live schedules and may include ads or announcements. A quiet soundscape of night air and crickets plays separately. Choose Lie back under the stars for a first-person view of the sky while the music continues. Choose Gently sit up, or press Esc, to return to your seat.",
  "미국 · LIVE RADIO": "USA · LIVE RADIO",
- "그리스 · LIVE RADIO": "Greece · LIVE RADIO"
+ "그리스 · LIVE RADIO": "Greece · LIVE RADIO",
+ "재즈바": "Jazz Bar",
+ "재즈바 선택": "Choose Jazz Bar",
+ "월넛 바와 작은 재즈 퀸텟 무대": "A walnut bar and an intimate jazz quintet stage",
+ "밤이 깊어질수록, 가까워지는 음악.": "Closer to the music, deeper into the night.",
+ "어쿠스틱 재즈와 스탠더드가 머무는 밤": "An evening of acoustic jazz and timeless standards",
+ "트리 곁에 앉기": "Sit by the tree",
+ "재즈바 좌석": "Jazz bar seating",
+ "잠시, 음악 — 애프터아워즈 재즈바": "The Listening Room — After Hours Jazz Bar",
+ "테이블과 바 좌석, 작은 퀸텟 무대가 있는 재즈바": "An intimate jazz bar with tables, bar seating and a quintet stage",
+ "테이블이나 바 좌석을 눌러 앉아보세요": "Tap a table chair or bar stool to walk over and sit",
+ "밤이 조금 더,": "As the night",
+ "깊어지는 자리.": "grows a little deeper.",
+ "낮은 조명과 다섯 연주자, 나만의 늦은 밤.": "Low lights, five musicians, a late night of your own.",
+ "테이블에 앉기": "Sit at a table",
+ "바에 앉기": "Sit at the bar",
+ "바에서 쉬기": "Rest at the bar",
+ "테이블에서 쉬기": "Rest at a table",
+ "무대 곁에서 조용히 마치기": "A quiet goodbye beside the stage",
+ "밤이 깊어도, 편안하게.": "Make yourself at home, after hours.",
+ "화면을 드래그해 둘러보고 방향키나 WASD로 걸어보세요. 바닥을 누르면 걸어가고, 의자를 누르면 그 자리까지 걸어가 앉아요.": "Drag to look around. Walk with the arrow keys or WASD, or tap the floor. Tap a chair to walk over and sit down.",
+ "테이블에 앉기 또는 바에 앉기로 가까운 빈자리를 찾을 수 있어요. 무대에서는 피아노, 콘트라베이스, 드럼, 색소폰, 트럼펫의 퀸텟이 함께해요.": "Choose Sit at a table or Sit at the bar to find a nearby free seat. On stage, a quintet of piano, double bass, drums, saxophone and trumpet keeps you company.",
+ "재즈바의 연주는 곧 준비돼요. 지금은 나의 음원 파일이나 링크를 연결해 감상할 수 있어요. 음악은 각자의 기기에서만 재생됩니다.": "The jazz bar programme is coming soon. For now, you can connect your own audio file or link. Playback stays on your own device.",
+ "재즈바의 연주는 곧 준비돼요.": "The jazz programme is coming soon.",
+ "지금은 나의 음원 파일이나 링크로 감상할 수 있어요.": "For now, connect your own audio file or link.",
+ "내 음악 연결하기": "Connect my music",
+ "재즈바의 음악": "Music for After Hours",
+ "전용 음원 준비 중 · 나만의 감상": "Programme coming soon · Personal listening",
+ "이 공간의 음악은 Ian Chung이 준비하고 있어요.": "Ian Chung is preparing the music for this space.",
+ "체임버홀, 촛불이 빛나는 빈야드홀, 별과 오로라 아래의 별빛 청음실, 작은 퀸텟과 함께하는 재즈바. 오늘 마음이 향하는 음악 공간을 골라보세요.": "A chamber hall, a candlelit vineyard hall, a starlight conservatory and an intimate jazz bar. Find a space that feels like yours.",
+ "네 편의 재즈 연주가 이어집니다. 함께 듣기에서는 같은 곡을 같은 시간에 듣고, 혼자 듣기로 나만의 감상을 할 수 있어요. 연주 목록에서 번호를 눌러 곡을 고르거나 추천 쪽지를 건네보세요.": "Four jazz recordings play in a loop. Listen together shares the same piece and timing with everyone; switch to personal listening for your own session. Choose a number in the programme or exchange a music note."
 };
 const valid=lang=>lang==='en'||lang==='ko';
 const query=new URLSearchParams(location.search).get('lang');
@@ -348,6 +378,9 @@ let saved='';try{saved=localStorage.getItem('listening-room-language')||'';}catc
 let language=valid(query)?query:valid(saved)?saved:(navigator.language||'ko').toLowerCase().startsWith('ko')?'ko':'en';
 const ko=/[가-힣]/;
 const rules=[
+ [/^트리 곁 (\d+)( · 나만의 자리)?$/,(_,n,own)=>`By the tree ${n}${own?' · Your own place':''}`],
+ [/^바 좌석 (\d+)( · 나만의 자리)?$/,(_,n,own)=>`Bar seat ${n}${own?' · Your own place':''}`],
+ [/^테이블 (\d+) · (\d+)번( · 나만의 자리)?$/,(_,n,seat,own)=>`Table ${n} · Seat ${seat}${own?' · Your own place':''}`],
  [/^테이블 (\d+)( · 나만의 자리)?$/,(_,n,own)=>`Table ${n}${own?' · Your own place':''}`],
  [/^함께 (\d+)명$/,(_,n)=>`${n} ${n==='1'?'visitor':'visitors'} here`],
  [/^(\d+)층 · (\d+)구역 (\d+)번$/,(_,floor,section,seat)=>`Level ${floor} · Section ${section}, seat ${seat}`],
@@ -365,9 +398,9 @@ const rules=[
  [/^(.+)님께 조용히 추천을 부탁했어요\.$/,(_,name)=>`You sent ${name} a quiet request.`],
  [/^(.+)님께 (.+) 추천을 건넸어요\.$/,(_,name,piece)=>`You recommended ${english(piece)} to ${name}.`],
  [/^(.+)님이 (.+) 추천을 보냈어요\.$/,(_,name,piece)=>`${name} recommended ${english(piece)} to you.`],
- [/^(체임버홀|빈야드홀)의 연주로 돌아왔어요\. 재생 버튼을 눌러주세요\.$/,(_,hall)=>`Back to ${dictionary[hall]}. Press play to begin.`],
- [/^(체임버홀|빈야드홀)의 연주를 감상하고 있어요\.$/,(_,hall)=>`You are listening to ${dictionary[hall]}.`],
- [/^(체임버홀|빈야드홀)의 연주를 선택했어요\.$/,(_,hall)=>`${dictionary[hall]} recordings selected.`]
+ [/^(체임버홀|빈야드홀|재즈바)의 연주로 돌아왔어요\. 재생 버튼을 눌러주세요\.$/,(_,hall)=>`Back to ${dictionary[hall]}. Press play to begin.`],
+ [/^(체임버홀|빈야드홀|재즈바)의 연주를 감상하고 있어요\.$/,(_,hall)=>`You are listening to ${dictionary[hall]}.`],
+ [/^(체임버홀|빈야드홀|재즈바)의 연주를 선택했어요\.$/,(_,hall)=>`${dictionary[hall]} recordings selected.`]
 ];
 function english(text){
  if(Object.hasOwn(dictionary,text))return dictionary[text];

@@ -7,7 +7,7 @@
   {key:'newage',label:'뉴에이지',name:'1st Greek New Age Radio',country:'그리스',description:'뉴에이지·앰비언트·우주를 닮은 소리',url:'https://newageradio.gr/',streams:['https://stream.newageradio.gr/listen/hq/radio.mp3','https://stream.newageradio.gr/listen/hq/radio.aac']},
   {key:'country',label:'컨트리',name:'181.FM · Kickin’ Country',country:'미국',description:'따뜻한 목소리와 컨트리 기타',url:'https://www.181.fm/',streams:['https://listen.181fm.com/181-kickincountry_128k.mp3','https://listen.181fm.com/181-kickincountry_64k.aac']},
   {key:'folk',label:'포크',name:'Folk Alley',country:'미국',description:'어쿠스틱 기타와 오래 머무는 이야기',url:'https://folkalley.com/',streams:['https://freshgrass.streamguys1.com/folkalley-128mp3']},
-  {key:'jazz',label:'재즈',name:'181.FM · Jazz Mix',country:'미국',description:'재즈가 흐르는 작은 밤',url:'https://www.181.fm/',streams:['https://listen.181fm.com/181-jazzmix_128k.mp3','https://listen.181fm.com/181-jazzmix_64k.aac']},
+  {key:'jazz',label:'재즈',name:'The Jazz Groove · Mix 1',country:'미국',description:'어쿠스틱 재즈와 스탠더드가 머무는 밤',url:'https://jazzgroove.org/',streams:['https://west-mp3-128.streamthejazzgroove.com/stream','https://radio.streamthejazzgroove.com/mix1-128k-free']},
   {key:'christmas',label:'캐롤',name:'181.FM · Christmas Classics',country:'미국',description:'트리 아래, 오래 사랑받은 크리스마스 음악',url:'https://www.181.fm/',streams:['https://listen.181fm.com/181-xtraditional_128k.mp3','https://listen.181fm.com/181-xtraditional_64k.aac']}
  ];
  const state=window.greenhouseListening={headphones:false,desk:-1,sound:'radio',station:null};
@@ -20,7 +20,7 @@
  function openDesk(){$('deskControls').hidden=false;$('deskOpen').setAttribute('aria-expanded','true');}
  function render(){
   const station=selected(),active=phase==='playing';playing=false;externalPlaying=active;window.musicRest=!active;sourceMode='radio';
-  $('deskName').textContent=state.desk<0?'아직 비어 있는 나의 자리':`테이블 ${String(state.desk+1).padStart(2,'0')}`;
+  $('deskName').textContent=state.desk<0?'아직 비어 있는 나의 자리':(state.desk>=36?`트리 곁 ${String(state.desk-35).padStart(2,'0')}`:`테이블 ${String(state.desk+1).padStart(2,'0')}`);
   $('nearestDesk').hidden=state.desk>=0;$('headphones').disabled=state.desk<0;$('headphones').textContent=state.headphones?'헤드폰 벗기':'헤드폰 쓰기';$('headphones').setAttribute('aria-pressed',state.headphones);
   panel.querySelectorAll('[data-radio]').forEach(b=>{b.disabled=state.desk<0;b.setAttribute('aria-pressed',b.dataset.radio===state.station);});
   $('radioLocation').textContent=station?station.country+' · LIVE RADIO':'LIVE RADIO';$('radioStationName').textContent=station?.name||'일곱 갈래의 음악, 나만의 주파수';$('radioDescription').textContent=station?.description||'자리에 앉은 뒤 장르를 골라주세요.';
