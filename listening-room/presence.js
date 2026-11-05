@@ -11,7 +11,11 @@
   const adjectives=['행복한','다정한','포근한','고요한','느긋한','따뜻한','반짝이는','꿈꾸는','산책하는','미소짓는','평온한','별빛 속'];
   const composers=['바흐','모차르트','쇼팽','슈베르트','드뷔시','라벨','브람스','베토벤','사티','슈만','비발디','멘델스존'];
   const pick=values=>{const n=new Uint32Array(1);crypto.getRandomValues(n);return values[n[0]%values.length];};
-  $('visitorName').value=pick(adjectives)+' '+pick(composers);
+  const suggested=window.roomI18n?.suggestName();
+  let originalSuggestion=suggested?.[window.roomI18n.language]||pick(adjectives)+' '+pick(composers);
+  $('visitorName').value=originalSuggestion;
+  let nameEdited=false;$('visitorName').addEventListener('input',()=>nameEdited=true);
+  addEventListener('roomLanguageChange',()=>{if(!nameEdited&&!document.body.classList.contains('hasEntered')&&suggested){originalSuggestion=suggested[window.roomI18n.language];$('visitorName').value=originalSuggestion;}delete $('peopleList').dataset.signature;ui();});
   $('nicknameMessage').textContent='그대로 들어가거나, 원하는 이름으로 바꿔주세요.';
   const bar=document.createElement('aside');bar.id='presenceBar';bar.setAttribute('aria-label','함께 머무는 사람들');
   bar.innerHTML='<button id="peopleToggle" aria-expanded="false">함께 머무는 중</button><div id="peoplePanel" hidden><strong>같은 공간에 머무는 이름들</strong><ul id="peopleList"></ul><p id="presenceNote" role="status"></p></div><button id="freeSeat" aria-label="가까운 빈자리에 앉기">빈자리</button><div class="quietGestures" role="group" aria-label="조용한 인사"><button data-greet="wave" aria-label="손인사">손인사</button><button data-greet="nod" aria-label="고개 끄덕이기">끄덕임</button></div>';
@@ -24,7 +28,7 @@
     $('peopleToggle').textContent=online?`함께 ${people.length}명`:solo?'혼자 머무는 중':connection==='connecting'?'연결하는 중…':'다시 연결하는 중…';
     $('presenceNote').textContent=online?(hall==='greenhouse'?'소리는 각자의 헤드폰에서만 들려요.':'함께 듣기에서는 곡 전환이 모두에게 적용돼요. 일시정지는 나에게만 적용됩니다.'):'연결이 돌아오면 다른 분들의 모습이 다시 보여요.';
     const signature=JSON.stringify(people.map(p=>[p.id,p.nick,p.seat]));if($('peopleList').dataset.signature!==signature){$('peopleList').dataset.signature=signature;$('peopleList').replaceChildren();
-    for(const person of people){const li=document.createElement('li'),name=document.createElement('span');name.textContent=person.nick+(person.id===id?' · 나':'')+(person.seat!==null?' · '+(person.seat+1)+'번':'');li.append(name);if(person.id!==id){const wave=document.createElement('button');wave.textContent='인사';wave.setAttribute('aria-label',person.nick+'님께 손인사');wave.onclick=()=>room.act('wave',person.id);const rec=document.createElement('button');rec.textContent='추천 부탁';rec.setAttribute('aria-label',person.nick+'님께 곡 추천 부탁하기');rec.onclick=async()=>{try{await room.recommend('recommend_request',{recipient:person.id});notice('조용히 곡 추천을 부탁했어요.');}catch{}};li.append(wave,rec);}$('peopleList').append(li);}}
+    for(const person of people){const li=document.createElement('li'),name=document.createElement('span');name.dataset.i18nSkip='';name.textContent=person.nick+(person.id===id?(window.roomI18n?.language==='en'?' · me':' · 나'):'')+(person.seat!==null?' · '+(window.roomI18n?.language==='en'?'seat ':'')+(person.seat+1)+(window.roomI18n?.language==='en'?'':'번'):'');li.append(name);if(person.id!==id){const wave=document.createElement('button');wave.textContent='인사';wave.setAttribute('aria-label',person.nick+'님께 손인사');wave.onclick=()=>room.act('wave',person.id);const rec=document.createElement('button');rec.textContent='추천 부탁';rec.setAttribute('aria-label',person.nick+'님께 곡 추천 부탁하기');rec.onclick=async()=>{try{await room.recommend('recommend_request',{recipient:person.id});notice('조용히 곡 추천을 부탁했어요.');}catch{}};li.append(wave,rec);}$('peopleList').append(li);}}
 
     document.querySelectorAll('[data-greet]').forEach(b=>b.disabled=false);
     if(hall!=='greenhouse')$('program').lastElementChild.textContent=(hall==='chamber'?'2':'3')+'편의 연주 · '+(online?'같은 공간에 함께':'혼자 감상하는 공간');
@@ -34,7 +38,7 @@
     const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),8000);
     try{
       const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json',...(secret?{Authorization:'Bearer '+secret}:{})},body:JSON.stringify({kind,...extra}),signal:controller.signal,cache:'no-store'});
-      const data=await response.json();if(!response.ok){const error=new Error(data.error||'잠시 후 다시 시도해주세요.');error.code=data.code;error.status=response.status;throw error;}return data;
+      const data=await response.json();if(!response.ok){const error=new Error(window.roomI18n?.serverMessage(data.error,data.code,response.status)||data.error||'잠시 후 다시 시도해주세요.');error.code=data.code;error.status=response.status;throw error;}return data;
     }finally{clearTimeout(timeout);}
   }
   function command(kind,extra={}){const job=queue.then(()=>request(kind,typeof extra==='function'?extra():extra));queue=job.catch(()=>{});return job;}
@@ -74,7 +78,7 @@
     id=null;secret='';people=[];peers.clear();connection='idle';try{sessionStorage.removeItem('listening-room-guest');}catch{}
   }
   const room=window.roomPresence={
-    get id(){return id;},ownState(){return {...local};},get nickname(){return nick||'나';},get connected(){return connection==='online'&&!solo;},get sharedMusic(){return shared&&connection==='online'&&!solo;},
+    get id(){return id;},ownState(){return {...local};},get nickname(){return nick||(window.roomI18n?.language==='en'?'me':'나');},get connected(){return connection==='online'&&!solo;},get sharedMusic(){return shared&&connection==='online'&&!solo;},
     program:currentProgram,
     frame(person,seat,moving){local={x:person.x,y:person.y,z:person.z,heading:person.heading,seat,moving};},
     peers(){const now=performance.now(),dt=Math.min(.2,(now-lastFrame)/1000);lastFrame=now;const blend=1-Math.exp(-dt*7);return [...peers.values()].map(p=>{for(const key of ['x','y','z'])p[key]+=(p.target[key]-p[key])*blend;const delta=Math.atan2(Math.sin(p.target.heading-p.heading),Math.cos(p.target.heading-p.heading));p.heading+=delta*blend;return {...p.target,x:p.x,y:p.y,z:p.z,heading:p.heading,gesture:p.target.gesture_until>Date.now()-offset?p.target.gesture:null,gestureProgress:Math.max(0,Math.min(1,1-(p.target.gesture_until-(Date.now()-offset))/(p.target.gesture==='tea'?12000:p.target.gesture==='blanket'?6000:4000))),gestureHeading:p.target.gesture_heading};}).sort((a,b)=>Math.hypot(a.x-local.x,a.z-local.z)-Math.hypot(b.x-local.x,b.z-local.z)).slice(0,hall==='chamber'?53:12).map((p,i)=>({...p,simplified:i>=12}));},
@@ -114,4 +118,5 @@
   const syncVisibility=()=>{bar.inert=!document.body.classList.contains('hasEntered')||document.body.classList.contains('arrivalActive')||document.body.classList.contains('ritualActive')||document.body.classList.contains('quiet');};
   new MutationObserver(syncVisibility).observe(document.body,{attributes:true,attributeFilter:['class']});syncVisibility();ui();
 })();
+
 
