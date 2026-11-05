@@ -1,6 +1,7 @@
 /* Local translations only. Visitor names, messages and audio are never sent for translation. */
 (()=>{
 const dictionary={
+"바에서의 작은 즐거움":"A little pleasure at the bar","오늘 밤의 한 잔":"A drink for tonight","올드패션드":"Old Fashioned","레드와인":"Red wine","진저에일":"Ginger ale","따뜻한 차":"Warm tea","마음에 드는 한 잔을 골라보세요.":"Choose something to linger over.","한 모금":"Take a sip","말없이 건배":"A quiet toast","마지막 한 모금":"One last sip","잔을 들어 답하기":"Raise your glass back","바텐더가 한 잔을 조용히 건네요.":"The bartender gently slides your drink over.","마지막 한 모금, 오늘 밤을 천천히 담아요.":"One last sip, taking in the night.","한 모금, 천천히.":"A sip, slowly.","이 밤을 위해, 조용히 잔을 들어요.":"A quiet toast to this evening.","옆자리에 잔을 들어 인사했어요.":"You raised your glass to your neighbor.","함께, 좋은 밤이에요.":"Here’s to a lovely night, together.","다음 밤에도, 이 자리에.":"Your place will be here another night.","한 잔의 여유, 음악은 계속 흘러요.":"Take your time. The music plays on.","작은 인사만으로도 충분해요.":"A small greeting is enough.",
  "모닥불 곁에서":"Beside the fire",
  "리듬 타기":"Feel the groove",
  "리듬 쉬기":"Rest the groove",
@@ -471,3 +472,4 @@ function mount(){
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
 })();
+
