@@ -1,6 +1,7 @@
 /* Local translations only. Visitor names, messages and audio are never sent for translation. */
 (()=>{
 const dictionary={
+ "모닥불 곁에서":"Beside the fire",
  "리듬 타기":"Feel the groove",
  "리듬 쉬기":"Rest the groove",
  "잠시, 음악": "A Moment, in Music",
