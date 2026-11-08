@@ -51,8 +51,28 @@ const candleFlames=[],candlePools=[];
 function candleCluster(x,y,z,count,seed){for(let k=0;k<count;k++){let a=k*2.399+seed,r=.11+Math.sqrt(k)*.13,xx=x+Math.cos(a)*r,zz=z+Math.sin(a)*r,hh=.19+((k*7+seed)%11)*.032;box(xx,y,zz,.072,hh,.072,['#8f7447','#6c522c','#ba965e']);candleFlames.push([xx,y+hh+.05,zz]);}candlePools.push([x,y+.25,z]);}
 for(let i=0;i<68;i++){let a=i/68*Math.PI*2;candleCluster(Math.sin(a)*9.5,.3,centerZ+Math.cos(a)*7.3,4,i);}
 for(let level=0;level<tiers.length;level++)for(let sector=0;sector<12;sector++){let {r,y}=tiers[level],a=sector/12*Math.PI*2+(level%2?.10:0),base=y+(sector%3)*.21;candleCluster(Math.sin(a)*(r-1.45),base+.18,centerZ+Math.cos(a)*(r-1.45)*.91,5,sector+level);}
+// Seasonal dressing sits on existing ledges and stage wings; seating and aisles stay intact.
+const holidayGlows=[];
+function festiveSphere(x,y,z,r,col,glowing=false){geo.push({sphere:true,detail:10,pts:[[x,y,z],[x+r,y,z],[x,y+r,z],[x,y,z+r]],col,holiday:true,holidayGlow:glowing});}
+function festiveStar(x,y,z,r){const start=geo.length;for(const turn of [0,Math.PI/2])for(let i=0;i<10;i++){const a=i*Math.PI/5,b=(i+1)*Math.PI/5,ra=i%2?r*.43:r,rb=(i+1)%2?r*.43:r;const p=(u,v)=>[x+u*Math.cos(turn),y+v,z+u*Math.sin(turn)];face([[x,y,z],p(Math.sin(a)*ra,Math.cos(a)*ra),p(Math.sin(b)*rb,Math.cos(b)*rb)],'#f6d99b');}for(let i=start;i<geo.length;i++){geo[i].holiday=true;geo[i].holidayGlow=true;}holidayGlows.push([x,y,z,r*1.8]);}
+function christmasFir(x,y,z,h){const start=geo.length;rod([x,y,z],[x,y+h*.89,z],.12,'#6c5032');for(let tier=0;tier<7;tier++){const base=y+.23+tier*h*.105,rr=h*.19*(1-tier*.125),top=base+h*.37;for(let j=0;j<20;j++){const a=j*Math.PI/10,b=(j+1)*Math.PI/10;face([[x+Math.sin(a)*rr,base,z+Math.cos(a)*rr],[x+Math.sin(b)*rr,base,z+Math.cos(b)*rr],[x,top,z]],['#315344','#244739','#3a5c48'][j%3]);}}
+for(let i=start;i<geo.length;i++)geo[i].holiday=true;
+for(let i=0;i<54;i++){const u=i/54,yy=y+.55+u*(h-.85),a=i*2.399,rr=h*.18*(1-u)*1.03;const xx=x+Math.sin(a)*rr,zz=z+Math.cos(a)*rr;festiveSphere(xx,yy,zz,.065+i%3*.008,'#f5d29a',true);if(i%3===0)festiveSphere(xx+.08,yy-.10,zz,.10,i%2?'#b39560':'#8c3540');}
+festiveStar(x,y+h+.28,z,.43);}
+christmasFir(-8,.89,-7.6,7.5);christmasFir(8,.89,-7.6,7.5);
+// Evergreen swags follow the curve of each existing terrace, below the seat sightline.
+for(let level=0;level<tiers.length;level++)for(let sector=0;sector<12;sector++){
+const {r,y}=tiers[level],mid=sector*Math.PI/6+(level%2?.10:0),base=y+(sector%3)*.21,rr=r-1.69;
+const point=(u)=>{const a=mid+(u-.5)*.43;return[Math.sin(a)*rr,base-.09-Math.sin(u*Math.PI)*.30,centerZ+Math.cos(a)*rr*.91];};
+for(let j=0;j<8;j++){const start=geo.length;rod(point(j/8),point((j+1)/8),.14,j%2?'#315443':'#244a39');for(let k=start;k<geo.length;k++)geo[k].holiday=true;}
+for(let j=0;j<7;j++){const p=point((j+.5)/7);festiveSphere(p[0],p[1]+.04,p[2],.065,'#edc994',true);}
+for(const u of [.15,.85]){const p=point(u);festiveSphere(p[0],p[1]-.14,p[2],.13,sector%3?'#a88b50':'#853b43');}
+}
+// Suspended stars form a quiet constellation beneath the tall timber canopy.
+for(let i=0;i<9;i++){const x=(i-4)*3.8,y=18.8+Math.abs(i-4)*.74+(i%2)*1.3,z=-10.6-Math.abs(i-4)*.45;const start=geo.length;rod([x,36,z],[x,y+.35,z],.012,'#887955');for(let k=start;k<geo.length;k++)geo[k].holiday=true;festiveStar(x,y,z,i%2?.33:.52);}
+
 // The hall is lit locally: the orchestra is readable; the outer shell disappears into darkness.
-function candleColor(g){let m=g.material;if(m._candle)return m._candle;let c=m.col,match;if(c[0]==='#'&&c.length===7){let n=parseInt(c.slice(1),16);match=[n>>16,(n>>8)&255,n&255];}else if(c.startsWith('rgb('))match=c.slice(4,-1).split(',').map(Number);else return c;let p=m.pts.reduce((a,v)=>a.map((n,i)=>n+v[i]/m.pts.length),[0,0,0]),r=Math.hypot(p[0],(p[2]+8)/.9),stage=Math.max(0,1-r/14),height=Math.max(0,1-Math.max(0,p[1]-8)/35),f=.075+stage*.58;if(r>10&&p[1]<18)f+=.085*Math.max(.2,1-r/55);f*=height;if(p[1]>32)f=Math.max(f,.17+stage*.06);if(m.col==='#e7d7a5')f=.48;if(g.hero)f=.66;let rgb=match.map((n,i)=>Math.min(255,Math.round(n*f*[1.2,1,.76][i]+[3,2,4][i])));let col=`rgb(${rgb})`;if(!g.hero)m._candle=col;return col;}
+function candleColor(g){let m=g.material;if(m._candle)return m._candle;let c=m.col,match;if(c[0]==='#'&&c.length===7){let n=parseInt(c.slice(1),16);match=[n>>16,(n>>8)&255,n&255];}else if(c.startsWith('rgb('))match=c.slice(4,-1).split(',').map(Number);else return c;let p=m.pts.reduce((a,v)=>a.map((n,i)=>n+v[i]/m.pts.length),[0,0,0]),r=Math.hypot(p[0],(p[2]+8)/.9),stage=Math.max(0,1-r/14),height=Math.max(0,1-Math.max(0,p[1]-8)/35),f=.075+stage*.58;if(r>10&&p[1]<18)f+=.085*Math.max(.2,1-r/55);f*=height;if(p[1]>32)f=Math.max(f,.17+stage*.06);if(m.col==='#e7d7a5')f=.48;if(g.hero)f=.66;if(m.holiday)f=Math.max(f,.48);if(m.holidayGlow)f=.86;let rgb=match.map((n,i)=>Math.min(255,Math.round(n*f*[1.2,1,.76][i]+[3,2,4][i])));let col=`rgb(${rgb})`;if(!g.hero)m._candle=col;return col;}
 function resize(){width=innerWidth;height=innerHeight;let d=Math.min(devicePixelRatio||1,1.6);C.width=width*d;C.height=height*d;X.setTransform(d,0,0,d,0,0);focal=height/(2*Math.tan((width<680?92:88)*Math.PI/360));}addEventListener('resize',resize);resize();
 function view(p){let dx=p[0]-cam.x,dy=p[1]-cam.y,dz=cam.z-p[2],c=Math.cos(cam.yaw),s=Math.sin(cam.yaw),xx=dx*c-dz*s,zz=dx*s+dz*c,cp=Math.cos(cam.pitch),sp=Math.sin(cam.pitch);return[xx,dy*cp-zz*sp,zz*cp+dy*sp];}
 function project(v){return{x:width/2+v[0]/v[2]*focal,y:height*.5-v[1]/v[2]*focal,d:v[2]};}
@@ -116,7 +136,7 @@ if(depthRenderer)depthRenderer.render(geo,worldGeometryCount,cam,C,X,width,heigh
 // Light bloom, gently flickering candle flames and drifting dust.
 }
 X.save();X.globalCompositeOperation='screen';for(let p of candlePools){let rr=Math.hypot(p[0],(p[2]+8)/.9);glow(p,.90,rr<11?.23:.07)};for(let i=0;i<candleFlames.length;i++){let c=candleFlames[i],p=point(c);if(!p)continue;let r=Math.max(.28,.032*focal/p.d),f=1+Math.sin(t*.004+i*1.7)*.14;let grad=X.createRadialGradient(p.x,p.y,0,p.x,p.y,r*7);grad.addColorStop(0,'#ffd58c88');grad.addColorStop(1,'#ffb13400');X.fillStyle=grad;X.fillRect(p.x-r*7,p.y-r*7,r*14,r*14);X.fillStyle='#ffe4a9';X.beginPath();X.ellipse(p.x,p.y,r*.68,r*2.1*f,Math.sin(t*.002+i)*.12,0,Math.PI*2);X.fill();}X.restore();
-X.save();X.globalCompositeOperation='screen';glow([0,4,-8],10,.15+(.08*(window.hallRitual?.breath||0)));for(let l of lights){let p=point(l);if(!p)continue;let flick=1+Math.sin(t*.003+l[0]*17+l[2])*0.1;glow(l,.72,.3*flick);let r=Math.max(.6,l[3]*focal/p.d);X.fillStyle='#ffe3a5';X.beginPath();X.ellipse(p.x,p.y,r*.65,r*2,0,0,Math.PI*2);X.fill();}for(let i=0;i<dust.length;i++){let d=dust[i],p=point([d[0]+Math.sin(t*.0001+i)*.12,d[1]+Math.sin(t*.00015+i)*.16,d[2]]);if(p&&p.x>0&&p.x<width&&p.y>0&&p.y<height){X.globalAlpha=.12+Math.sin(t*.0007+i)*.07;X.fillStyle='#f8e5a9';X.beginPath();X.arc(p.x,p.y,Math.min(1.6,9/p.d),0,Math.PI*2);X.fill();}}X.restore();
+X.save();X.globalCompositeOperation='screen';for(const h of holidayGlows)glow(h,h[3],.18);glow([0,4,-8],10,.15+(.08*(window.hallRitual?.breath||0)));for(let l of lights){let p=point(l);if(!p)continue;let flick=1+Math.sin(t*.003+l[0]*17+l[2])*0.1;glow(l,.72,.3*flick);let r=Math.max(.6,l[3]*focal/p.d);X.fillStyle='#ffe3a5';X.beginPath();X.ellipse(p.x,p.y,r*.65,r*2,0,0,Math.PI*2);X.fill();}for(let i=0;i<dust.length;i++){let d=dust[i],p=point([d[0]+Math.sin(t*.0001+i)*.12,d[1]+Math.sin(t*.00015+i)*.16,d[2]]);if(p&&p.x>0&&p.x<width&&p.y>0&&p.y<height){X.globalAlpha=.12+Math.sin(t*.0007+i)*.07;X.fillStyle='#f8e5a9';X.beginPath();X.arc(p.x,p.y,Math.min(1.6,9/p.d),0,Math.PI*2);X.fill();}}X.restore();
 // Breathing gently warms the whole hall without brightening its architecture.
 if(window.hallRitual?.phase==='breathing'){X.fillStyle=`rgba(237,161,67,${(window.hallRitual.breath||0)*.045})`;X.fillRect(0,0,width,height);}
 personalLight(t);
@@ -149,3 +169,4 @@ const ceilingButton=document.createElement('button');ceilingButton.id='ceilingVi
 })();
 
 window.setupHallZoom?.(canvas);
+
