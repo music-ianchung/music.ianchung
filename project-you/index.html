@@ -240,6 +240,17 @@ radial-gradient(circle at 0% 64%,rgba(255,111,35,.58),rgba(255,111,35,.13) 20%,t
 @media(min-width:1000px){.session-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:28px}.choir-intro{display:grid;grid-template-columns:1fr 1fr;gap:50px}.choir-intro .copy{margin:0}}
 @media(max-width:480px){.lead-vocal{align-items:flex-start;flex-direction:column;gap:12px}.session-grid{gap:30px 16px}}
 </style>
+<style id="melle-lead-profile">
+.lead-vocal{display:block;padding:30px 0 0}
+.lead-vocal .group-title{margin:0 0 28px}
+.lead-feature{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:48px;align-items:center}
+.lead-photo{margin:0;overflow:hidden;background:#211d1b}
+.lead-photo img{display:block;width:100%;height:auto;filter:grayscale(1) contrast(1.03)}
+.lead-bio h4{font-family:var(--serif);font-size:clamp(38px,4.5vw,60px);font-weight:300;line-height:1.05;letter-spacing:-.025em;margin:0}
+.lead-bio .role{text-align:left;margin-top:10px;font-size:9px;letter-spacing:.16em}
+.lead-bio p{font-family:var(--serif);font-size:17px;font-weight:300;line-height:1.58;color:rgba(243,231,215,.76);margin:22px 0 0;max-width:480px}
+@media(max-width:700px){.lead-feature{grid-template-columns:1fr;gap:26px}.lead-bio p{font-size:16px;margin-top:16px}}
+</style>
 </head>
 <body class="cinematic">
 <nav aria-label="Main navigation"><div class="wrap navin"><a class="logo" href="/project-you/" aria-label="Project YOU"><img src="project-you-logo.png" alt="Project YOU"></a><div class="links"><a href="/#music">Music</a><a href="/#about">About</a><a href="/#interview">Interview</a><a href="/#connect">Connect</a></div></div></nav>
@@ -264,7 +275,7 @@ radial-gradient(circle at 0% 64%,rgba(255,111,35,.58),rgba(255,111,35,.13) 20%,t
 <section id="song" class="section song cinematic"><div class="wrap song-inner"><div class="label">03 — The Song</div><h2>Project YOU</h2><div class="tag">All those miles have brought you here.</div><p class="copy">A song of hope for anyone who has ever felt lost, weary or unsure. A reminder that you have made it this far — and that kindness, in any form, still matters.</p><a class="outline" href="/#music">Listen on your platform →</a></div></section>
 
 <section id="artists" class="section artists cinematic"><div class="wrap"><div class="head"><div class="label">04 — Featured Artists</div><h2>The people behind the music.</h2></div>
-<section class="lead-vocal artist-group" aria-labelledby="lead-vocal-title"><h3 id="lead-vocal-title" class="group-title">Lead Vocals</h3><p class="vocal-announcement">To be announced</p></section>
+<section class="lead-vocal artist-group" aria-labelledby="lead-vocal-title"><h3 id="lead-vocal-title" class="group-title">Lead Vocals</h3><article class="lead-feature"><figure class="lead-photo"><img src="melle.jpg" alt="Melle singing and playing guitar on stage" width="750" height="387" loading="lazy" decoding="async"></figure><div class="lead-bio"><h4>Melle</h4><div class="role">Lead Vocals</div><p>Rising Dutch singer-songwriter and multi-instrumentalist known for his raw, organic sound, rich harmonies and heartfelt melodies. Winner of the Nobel Award Leiden and Mooie Noten Amsterdam, he brings an intimate, authentic spirit to contemporary songwriting.</p></div></article></section>
 <section class="session-musicians artist-group" aria-labelledby="session-title"><h3 id="session-title" class="group-title">Session Musicians</h3><div class="session-grid"><article class="artist"><figure class="artist-photo will"><img src="will-mcnicol.webp" alt="Will McNicol playing acoustic guitar" loading="lazy" decoding="async"></figure><div class="artist-top"><h4>Will McNicol</h4><div class="role">Acoustic Guitar</div></div><p>British acoustic guitarist and composer, named <strong>UK Acoustic Guitarist of the Year by Guitarist Magazine in 2011</strong>, and later recognised by <em>Acoustic Guitar Magazine</em> among its “30 Great Guitarists Under 30.”</p></article>
 <article class="artist"><figure class="artist-photo edward"><img src="edward-cross.webp" alt="Edward Cross seated in front of a piano" loading="lazy" decoding="async"></figure><div class="artist-top"><h4>Edward Cross</h4><div class="role">Piano</div></div><p>British multi-instrumentalist, composer and session musician whose work bridges classical sensitivity and contemporary sound, with film-scoring credits including <em>Day in June</em> and <em>Take Me Home</em>.</p></article>
 <article class="artist"><figure class="artist-photo callum"><img src="callum-walsh.jpg" alt="Callum Walsh playing bass guitar" loading="lazy" decoding="async"></figure><div class="artist-top"><h4>Callum Walsh</h4><div class="role">Bass</div></div><p>British guitarist, bassist and session musician specialising in jazz performance and theatre pit bands. Past credits include musical director of the Cambridge University Jazz Orchestra, with concerts across the UK.</p></article>
@@ -289,3 +300,4 @@ radial-gradient(circle at 0% 64%,rgba(255,111,35,.58),rgba(255,111,35,.13) 20%,t
 </main>
 <footer>Project YOU · A music project by <a href="/">Ian Chung</a></footer>
 </body></html>
+
