@@ -297,9 +297,15 @@ body .cinematic::after{display:none}
 @media(prefers-reduced-motion:reduce){.ambient-surface::before{animation:none}.reveal-pending{opacity:1;transform:none;transition:none}.artist-photo img,.quartet-photo img{transition:none}}
 @media print{.ambient-surface,.scroll-progress{display:none}.reveal-pending{opacity:1;transform:none}}
 </style>
+<style id="fixed-orb-depth">
+/* Keep the recognisable light in the viewport, outside scrolling content. */
+body .hero::before{display:none}
+.ambient-orb{position:absolute;right:-11vw;top:10vh;width:68vw;height:68vw;max-width:650px;max-height:650px;border-radius:50%;background:radial-gradient(circle at 47% 45%,#fff0c5 0,#ffd27f 28%,#ff9e45 58%,#ff6d2c 82%,#eb5c25 100%);box-shadow:0 0 45px rgba(255,115,43,.24),0 0 120px rgba(255,115,43,.14);opacity:var(--orb-opacity,1)}
+@media(min-width:860px){.ambient-orb{right:7vw;top:10vh;width:38vw;height:38vw}}
+</style>
 </head>
 <body class="cinematic">
-<div class="ambient-surface" aria-hidden="true"></div>
+<div class="ambient-surface" aria-hidden="true"><div class="ambient-orb"></div></div>
 <div class="scroll-progress" aria-hidden="true"></div>
 <nav aria-label="Main navigation"><div class="wrap navin"><a class="logo" href="/project-you/" aria-label="Project YOU"><img src="project-you-logo.png" alt="Project YOU"></a></div></nav>
 
@@ -366,6 +372,7 @@ body .cinematic::after{display:none}
  let queued = false;
  const update = () => {
    const range = document.documentElement.scrollHeight - innerHeight;
+   document.querySelector('.ambient-orb').style.setProperty('--orb-opacity', String(1 - .84 * Math.min(1, Math.max(0, scrollY / (innerHeight * .65)))));
    bar.style.transform = 'scaleX(' + (range > 0 ? Math.min(1, Math.max(0, scrollY / range)) : 0) + ')';
    queued = false;
  };
@@ -400,6 +407,7 @@ body .cinematic::after{display:none}
 })();
 </script>
 </body></html>
+
 
 
 
