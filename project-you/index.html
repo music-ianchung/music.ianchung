@@ -328,6 +328,7 @@ mask-image:linear-gradient(to right,transparent,#000 5px,#000 calc(100% - 5px),t
 </style>
 <link rel="stylesheet" href="warmth.css">
 <style>.hero .release-date{margin:31px 0 0;font:500 10px/1.4 var(--sans);letter-spacing:.19em;text-transform:uppercase;color:var(--cream)!important}</style>
+<style>@media(max-width:700px),(hover:none) and (pointer:coarse){.outward-arrow,.press-arrow{display:none}}</style>
 </head>
 <body class="cinematic">
 <div class="ambient-surface" aria-hidden="true"><div class="ambient-orb"><img class="orb-logo" src="project-you-logo.png" alt=""></div></div>
@@ -347,7 +348,7 @@ mask-image:linear-gradient(to right,transparent,#000 5px,#000 calc(100% - 5px),t
  </div>
 </section>
 
-<section class="section reminder-section" aria-labelledby="reminder-title"><div class="wrap reminder-wrap"><div class="label">A moment for you</div><h2 id="reminder-title">A little reminder for you.</h2><p class="copy">A line from the song, to carry with you.</p><blockquote id="reminder-line" aria-live="polite">All those miles have brought you here.</blockquote><div class="warm-actions"><button type="button" id="another-line">Another reminder ↻</button><button type="button" id="save-card">Save card ↓</button><button type="button" id="share-reminder">Share this line ↗</button></div><p class="warm-status" id="reminder-status" role="status"></p><div class="copy-fallback" id="reminder-fallback" hidden><label for="reminder-copy">Copy this message</label><textarea id="reminder-copy" readonly rows="4"></textarea></div></div></section>
+<section class="section reminder-section" aria-labelledby="reminder-title"><div class="wrap reminder-wrap"><div class="label">A moment for you</div><h2 id="reminder-title">A little reminder for you.</h2><p class="copy">A line from the song, to carry with you.</p><blockquote id="reminder-line" aria-live="polite">All those miles have brought you here.</blockquote><div class="warm-actions"><button type="button" id="another-line">Another reminder ↻</button><button type="button" id="save-card">Save card ↓</button><button type="button" id="share-reminder">Share this line <span class="outward-arrow" aria-hidden="true">↗</span></button></div><p class="warm-status" id="reminder-status" role="status"></p><div class="copy-fallback" id="reminder-fallback" hidden><label for="reminder-copy">Copy this message</label><textarea id="reminder-copy" readonly rows="4"></textarea></div></div></section>
 <section class="steps cinematic"><div class="wrap"><div class="step"><div class="num">01</div><h3>Listen.</h3><p>Play the song. Let the music be with you.</p></div><div class="step"><div class="num">02</div><h3>Find yourself.</h3><p>Take from the music whatever speaks to you.</p></div><div class="step"><div class="num">03</div><h3>Pass it on.</h3><p>If it means something to you, share it with someone.</p></div></div></section>
 
 <section id="song" class="section song cinematic"><div class="wrap song-inner"><div class="label">03 — The Song</div><h2>Project YOU</h2><div class="tag">All those miles have brought you here.</div><div id="project-player" hidden><audio id="project-audio" controls preload="none" aria-label="Play Project YOU"></audio><button type="button" id="light-toggle" aria-pressed="true">Music-responsive light: on</button><p id="audio-status" class="warm-status" role="status"></p></div><p class="copy">A song of hope for anyone who has ever felt lost, weary or unsure. A reminder that you have made it this far — and that kindness, in any form, still matters.</p><a class="outline" href="/#music">Listen on your platform →</a></div></section>
@@ -388,7 +389,7 @@ mask-image:linear-gradient(to right,transparent,#000 5px,#000 calc(100% - 5px),t
     <div class="closing-title"><div class="label">07 — Our Hope</div><h2>For a brighter<br>tomorrow.</h2></div>
     <div class="closing-copy"><p class="copy">Project YOU is a reminder that you have made it this far — and that kindness, in any form, still matters. We hope this song can be a small light for those who need it, and a step toward a more compassionate world for children everywhere.</p><p class="closing-script">All those miles have brought you here.</p></div>
     </div></section>
-<section class="section pass-on" aria-labelledby="pass-on-title"><div class="wrap reminder-wrap"><div class="label">Pass it on</div><h2 id="pass-on-title">Did someone come to mind?</h2><p class="copy">Sometimes a song says what we cannot quite put into words.</p><label class="message-label" for="song-message">A note to go with it</label><textarea id="song-message" rows="3" maxlength="500">This made me think of you. All those miles have brought you here.</textarea><div class="warm-actions"><button type="button" id="send-song">Send them this song ↗</button><button type="button" id="copy-song">Copy link</button></div><p id="song-share-status" class="warm-status" role="status"></p><div class="copy-fallback" id="song-fallback" hidden><label for="song-copy">Copy this message</label><textarea id="song-copy" readonly rows="4"></textarea></div></div></section>
+<section class="section pass-on" aria-labelledby="pass-on-title"><div class="wrap reminder-wrap"><div class="label">Pass it on</div><h2 id="pass-on-title">Did someone come to mind?</h2><p class="copy">Sometimes a song says what we cannot quite put into words.</p><label class="message-label" for="song-message">A note to go with it</label><textarea id="song-message" rows="3" maxlength="500">This made me think of you. All those miles have brought you here.</textarea><div class="warm-actions"><button type="button" id="send-song">Send them this song <span class="outward-arrow" aria-hidden="true">↗</span></button><button type="button" id="copy-song">Copy link</button></div><p id="song-share-status" class="warm-status" role="status"></p><div class="copy-fallback" id="song-fallback" hidden><label for="song-copy">Copy this message</label><textarea id="song-copy" readonly rows="4"></textarea></div></div></section>
 </main>
 <footer>Project YOU · A music project by <a href="/">Ian Chung</a></footer>
 <script>
@@ -433,6 +434,7 @@ mask-image:linear-gradient(to right,transparent,#000 5px,#000 calc(100% - 5px),t
 </script>
 <script src="warmth.js" defer></script>
 </body></html>
+
 
 
 
