@@ -313,6 +313,19 @@ body .hero::before{display:none}
 .quartet-photo img[alt="Ai Ling Woolston"]{transform:scale(1.9);transform-origin:70% 6%}
 @media(hover:hover) and (prefers-reduced-motion:no-preference){.quartet-card:hover .quartet-photo img[alt="Ai Ling Woolston"]{transform:scale(1.94)}}
 </style>
+<style id="portrait-edge-feather">
+/* A narrow feather softens only the outside edge of each portrait. */
+.artist-photo,.quartet-photo,.lead-photo{
+-webkit-mask-image:linear-gradient(to right,transparent,#000 8px,#000 calc(100% - 8px),transparent),linear-gradient(to bottom,transparent,#000 8px,#000 calc(100% - 8px),transparent);
+-webkit-mask-composite:source-in;
+mask-image:linear-gradient(to right,transparent,#000 8px,#000 calc(100% - 8px),transparent),linear-gradient(to bottom,transparent,#000 8px,#000 calc(100% - 8px),transparent);
+mask-composite:intersect
+}
+@media(max-width:700px){.artist-photo,.quartet-photo,.lead-photo{
+-webkit-mask-image:linear-gradient(to right,transparent,#000 5px,#000 calc(100% - 5px),transparent),linear-gradient(to bottom,transparent,#000 5px,#000 calc(100% - 5px),transparent);
+mask-image:linear-gradient(to right,transparent,#000 5px,#000 calc(100% - 5px),transparent),linear-gradient(to bottom,transparent,#000 5px,#000 calc(100% - 5px),transparent)
+}}
+</style>
 </head>
 <body class="cinematic">
 <div class="ambient-surface" aria-hidden="true"><div class="ambient-orb"><img class="orb-logo" src="project-you-logo.png" alt=""></div></div>
@@ -415,6 +428,7 @@ body .hero::before{display:none}
 })();
 </script>
 </body></html>
+
 
 
 
