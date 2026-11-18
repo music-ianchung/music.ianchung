@@ -304,21 +304,15 @@ body .hero::before{display:none}
 @media(min-width:860px){.ambient-orb{right:7vw;top:10vh;width:38vw;height:38vw}}
 </style>
 <style id="logo-on-orb">
-/* The opening logo follows the light's geometry, with room for its closing line. */
-nav[aria-label="Main navigation"]{inset:auto;top:10vh;right:-11vw;width:68vw;height:68vw;max-width:650px;max-height:650px;display:grid;place-items:center;z-index:3;pointer-events:none}
-nav .navin{width:100%;margin:0;display:flex;justify-content:center}
-nav .logo{display:block;width:46%;transform:translateY(-18%);pointer-events:auto}
-nav .logo img{width:100%!important;height:auto!important;filter:brightness(0);opacity:.7}
-nav .logo:focus-visible{outline:1px solid var(--cream);outline-offset:10px;border-radius:4px}
-@media(min-width:860px){nav[aria-label="Main navigation"]{right:7vw;width:38vw;height:38vw}}
-@media(max-width:859px){nav .logo{width:42%;transform:translateY(-32%)}}
+/* Logo and light share one fixed parent and one opacity. */
+.ambient-orb{display:grid;place-items:center}
+.orb-logo{display:block;width:46%;height:auto;transform:translateY(-18%);filter:brightness(0);opacity:.7}
+@media(max-width:859px){.orb-logo{width:42%;transform:translateY(-32%)}}
 </style>
 </head>
 <body class="cinematic">
-<div class="ambient-surface" aria-hidden="true"><div class="ambient-orb"></div></div>
+<div class="ambient-surface" aria-hidden="true"><div class="ambient-orb"><img class="orb-logo" src="project-you-logo.png" alt=""></div></div>
 <div class="scroll-progress" aria-hidden="true"></div>
-<nav aria-label="Main navigation"><div class="wrap navin"><a class="logo" href="/project-you/" aria-label="Project YOU"><img src="project-you-logo.png" alt="Project YOU"></a></div></nav>
-
 <header class="hero cinematic">
  <div class="optics"><div class="sun"></div><div class="flare f1"></div><div class="flare f2"></div></div>
  <div class="wrap hero-in"><div class="hero-copy"><div class="label">A collaborative music project</div><h1>Music<br><em>for someone.</em></h1><p>A song for anyone carrying something heavy. Through music, we hope to bring comfort, connection and hope — and support children affected by war or conflict.</p><a class="textlink" href="#song"><span>Listen to the song</span><span>→</span></a></div><div class="hero-bottom"><div class="script">All those miles<br>have brought you here.</div><div class="scroll">Scroll to discover ↓</div></div></div>
@@ -417,6 +411,7 @@ nav .logo:focus-visible{outline:1px solid var(--cream);outline-offset:10px;borde
 })();
 </script>
 </body></html>
+
 
 
 
