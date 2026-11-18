@@ -303,6 +303,16 @@ body .hero::before{display:none}
 .ambient-orb{position:absolute;right:-11vw;top:10vh;width:68vw;height:68vw;max-width:650px;max-height:650px;border-radius:50%;background:radial-gradient(circle at 47% 45%,#fff0c5 0,#ffd27f 28%,#ff9e45 58%,#ff6d2c 82%,#eb5c25 100%);box-shadow:0 0 45px rgba(255,115,43,.24),0 0 120px rgba(255,115,43,.14);opacity:var(--orb-opacity,1)}
 @media(min-width:860px){.ambient-orb{right:7vw;top:10vh;width:38vw;height:38vw}}
 </style>
+<style id="logo-on-orb">
+/* The opening logo follows the light's geometry, with room for its closing line. */
+nav[aria-label="Main navigation"]{inset:auto;top:10vh;right:-11vw;width:68vw;height:68vw;max-width:650px;max-height:650px;display:grid;place-items:center;z-index:3;pointer-events:none}
+nav .navin{width:100%;margin:0;display:flex;justify-content:center}
+nav .logo{display:block;width:46%;transform:translateY(-18%);pointer-events:auto}
+nav .logo img{width:100%!important;height:auto!important;filter:brightness(0);opacity:.7}
+nav .logo:focus-visible{outline:1px solid var(--cream);outline-offset:10px;border-radius:4px}
+@media(min-width:860px){nav[aria-label="Main navigation"]{right:7vw;width:38vw;height:38vw}}
+@media(max-width:859px){nav .logo{width:42%;transform:translateY(-32%)}}
+</style>
 </head>
 <body class="cinematic">
 <div class="ambient-surface" aria-hidden="true"><div class="ambient-orb"></div></div>
@@ -407,6 +417,7 @@ body .hero::before{display:none}
 })();
 </script>
 </body></html>
+
 
 
 
