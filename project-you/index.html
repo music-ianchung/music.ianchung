@@ -326,6 +326,7 @@ mask-composite:intersect
 mask-image:linear-gradient(to right,transparent,#000 5px,#000 calc(100% - 5px),transparent),linear-gradient(to bottom,transparent,#000 5px,#000 calc(100% - 5px),transparent)
 }}
 </style>
+<link rel="stylesheet" href="warmth.css">
 </head>
 <body class="cinematic">
 <div class="ambient-surface" aria-hidden="true"><div class="ambient-orb"><img class="orb-logo" src="project-you-logo.png" alt=""></div></div>
@@ -345,9 +346,10 @@ mask-image:linear-gradient(to right,transparent,#000 5px,#000 calc(100% - 5px),t
  </div>
 </section>
 
+<section class="section reminder-section" aria-labelledby="reminder-title"><div class="wrap reminder-wrap"><div class="label">A moment for you</div><h2 id="reminder-title">A little reminder for you.</h2><p class="copy">A line from the song, to carry with you.</p><blockquote id="reminder-line" aria-live="polite">All those miles have brought you here.</blockquote><div class="warm-actions"><button type="button" id="another-line">Another reminder ↻</button><button type="button" id="save-card">Save card ↓</button><button type="button" id="share-reminder">Share this line ↗</button></div><p class="warm-status" id="reminder-status" role="status"></p><div class="copy-fallback" id="reminder-fallback" hidden><label for="reminder-copy">Copy this message</label><textarea id="reminder-copy" readonly rows="4"></textarea></div></div></section>
 <section class="steps cinematic"><div class="wrap"><div class="step"><div class="num">01</div><h3>Listen.</h3><p>Play the song. Let the music be with you.</p></div><div class="step"><div class="num">02</div><h3>Find yourself.</h3><p>Take from the music whatever speaks to you.</p></div><div class="step"><div class="num">03</div><h3>Pass it on.</h3><p>If it means something to you, share it with someone.</p></div></div></section>
 
-<section id="song" class="section song cinematic"><div class="wrap song-inner"><div class="label">03 — The Song</div><h2>Project YOU</h2><div class="tag">All those miles have brought you here.</div><p class="copy">A song of hope for anyone who has ever felt lost, weary or unsure. A reminder that you have made it this far — and that kindness, in any form, still matters.</p><a class="outline" href="/#music">Listen on your platform →</a></div></section>
+<section id="song" class="section song cinematic"><div class="wrap song-inner"><div class="label">03 — The Song</div><h2>Project YOU</h2><div class="tag">All those miles have brought you here.</div><div id="project-player" hidden><audio id="project-audio" controls preload="none" aria-label="Play Project YOU"></audio><button type="button" id="light-toggle" aria-pressed="true">Music-responsive light: on</button><p id="audio-status" class="warm-status" role="status"></p></div><p class="copy">A song of hope for anyone who has ever felt lost, weary or unsure. A reminder that you have made it this far — and that kindness, in any form, still matters.</p><a class="outline" href="/#music">Listen on your platform →</a></div></section>
 
 <section id="artists" class="section artists cinematic"><div class="wrap"><div class="head"><div class="label">04 — Featured Artists</div><h2>The people behind the music.</h2></div>
 <section class="lead-vocal artist-group" aria-labelledby="lead-vocal-title"><h3 id="lead-vocal-title" class="group-title">Lead Vocals</h3><article class="lead-feature"><figure class="lead-photo"><img src="melle.jpg" alt="Melle singing and playing guitar on stage" width="750" height="387" loading="lazy" decoding="async"></figure><div class="lead-bio"><h4>Melle</h4><div class="role">Lead Vocals</div><p>Rising Dutch singer-songwriter and multi-instrumentalist known for his raw, organic sound, rich harmonies and heartfelt melodies. Winner of the Nobel Award Leiden and Mooie Noten Amsterdam, he brings an intimate, authentic spirit to contemporary songwriting.</p><div class="melle-platforms" aria-label="Listen to Melle">
@@ -373,7 +375,7 @@ mask-image:linear-gradient(to right,transparent,#000 5px,#000 calc(100% - 5px),t
 <article class="quartet-card"><figure class="quartet-photo"><img src="quartet-viola.jpg" alt="Dale Kim" width="960" height="1200" loading="lazy" decoding="async"></figure><div class="role">Viola</div><h4>Dale Kim</h4><p>Toronto-born violist and member of the Seoul Philharmonic Orchestra since 2008, with orchestral experience including the Aspen Chamber Symphony, New World Symphony, Kentucky Symphony and Dayton Philharmonic.</p></article>
 <article class="quartet-card"><figure class="quartet-photo"><img src="quartet-cello.jpg" alt="Faris Amin" width="960" height="1200" loading="lazy" decoding="async"></figure><div class="role">Cello</div><h4>Faris Amin</h4><p>Palestinian cellist and educator working across solo performance, ensembles and collaborations in music, dance and theatre. He holds a Bachelor’s degree in Cello Performance from Germany and an MA in Community Music from Ireland.</p></article>
 </div></section>
-<section class="choir-group artist-group" aria-labelledby="choir-title"><h3 id="choir-title" class="group-title">The Choir</h3><div class="choir-intro"><h4>Milton Road Primary School, Cambridge</h4><p class="copy">Young voices at the heart of Project YOU, bringing warmth and hope to the emotional centre of the new arrangement.</p></div><figure class="choir-photo"><img src="choir-illustration.png" alt="Illustrative children’s choir seen from behind in warm rehearsal-room light" loading="lazy" decoding="async"><figcaption>AI-generated illustration · Not a photograph of the school choir.</figcaption></figure></section>
+<section class="choir-group artist-group" aria-labelledby="choir-title"><h3 id="choir-title" class="group-title">The Choir</h3><div class="choir-feature"><figure class="lead-photo choir-portrait"><img src="choir-rehearsal.jpg" alt="Milton Road Primary School children rehearsing Project YOU with their choir leader" width="1151" height="1536" loading="lazy" decoding="async"></figure><div class="lead-bio choir-bio"><h4>Milton Road Primary School</h4><div class="role">Cambridge · Children’s Choir</div><p>With a long tradition of placing music at the heart of school life, Milton Road Primary School’s choir has been led by classroom teachers Anna-Louise Lawrence since 2005 and Emily Lane from 2026.</p><p>Marion Cauldwell had been the choir’s pianist since 2012 and holds a master’s degree in Performance from the Guildhall School of Music &amp; Drama. She has a special interest in performing works by women and historically marginalised composers, and in nurturing a love of music in young singers and pianists.</p><p>Exploring songs from around the world, the choir introduces children to music they might not otherwise encounter, developing their musical skills through harmonies and rhythmic body percussion.</p></div></div></section>
 <section class="creator-group artist-group" aria-labelledby="creator-title"><h3 id="creator-title" class="group-title">Behind the Project</h3><article class="lead-feature"><figure class="lead-photo"><img src="ian-chung.jpg" alt="Ian Chung" width="2880" height="1200" loading="lazy" decoding="async"></figure><div class="lead-bio"><h4>Ian Chung</h4><div class="role">Songwriter &amp; Producer</div><p>Seoul-based songwriter and producer creating music rooted in warmth, connection and everyday life. As the creator of Project YOU, he brings together musicians across borders to offer comfort through music.</p></div></article></section>
 </div></section>
 
@@ -385,6 +387,7 @@ mask-image:linear-gradient(to right,transparent,#000 5px,#000 calc(100% - 5px),t
     <div class="closing-title"><div class="label">07 — Our Hope</div><h2>For a brighter<br>tomorrow.</h2></div>
     <div class="closing-copy"><p class="copy">Project YOU is a reminder that you have made it this far — and that kindness, in any form, still matters. We hope this song can be a small light for those who need it, and a step toward a more compassionate world for children everywhere.</p><p class="closing-script">All those miles have brought you here.</p></div>
     </div></section>
+<section class="section pass-on" aria-labelledby="pass-on-title"><div class="wrap reminder-wrap"><div class="label">Pass it on</div><h2 id="pass-on-title">Did someone come to mind?</h2><p class="copy">Sometimes a song says what we cannot quite put into words.</p><label class="message-label" for="song-message">A note to go with it</label><textarea id="song-message" rows="3" maxlength="500">This made me think of you. All those miles have brought you here.</textarea><div class="warm-actions"><button type="button" id="send-song">Send them this song ↗</button><button type="button" id="copy-song">Copy link</button></div><p id="song-share-status" class="warm-status" role="status"></p><div class="copy-fallback" id="song-fallback" hidden><label for="song-copy">Copy this message</label><textarea id="song-copy" readonly rows="4"></textarea></div></div></section>
 </main>
 <footer>Project YOU · A music project by <a href="/">Ian Chung</a></footer>
 <script>
@@ -427,7 +430,9 @@ mask-image:linear-gradient(to right,transparent,#000 5px,#000 calc(100% - 5px),t
  });
 })();
 </script>
+<script src="warmth.js" defer></script>
 </body></html>
+
 
 
 

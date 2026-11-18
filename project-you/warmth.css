@@ -1,0 +1,24 @@
+.choir-feature{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:64px;align-items:center}
+.choir-portrait{width:100%;max-width:460px}
+.choir-portrait img{width:100%;height:auto;filter:grayscale(1) contrast(1.03)}
+.choir-bio h4{font-size:clamp(32px,3.8vw,48px);max-width:13ch}
+.choir-bio p{max-width:560px;font-size:18px}
+.reminder-wrap{max-width:780px;text-align:center}
+.reminder-wrap h2{font:300 clamp(38px,7vw,64px)/1.05 var(--serif);letter-spacing:-.025em;margin:20px 0}
+.reminder-wrap .copy{margin:0 auto}
+#reminder-line{font:300 italic clamp(30px,5vw,48px)/1.25 var(--serif);max-width:600px;min-height:3.8em;display:grid;place-items:center;margin:36px auto 28px;text-wrap:balance}
+.warm-actions{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+.warm-actions button,#light-toggle{font:400 10px/1.4 var(--sans);letter-spacing:.06em;color:var(--cream);background:rgba(243,231,215,.025);border:1px solid rgba(243,231,215,.35);border-radius:99px;padding:13px 20px;cursor:pointer;min-height:44px}
+.warm-actions button:hover,#light-toggle:hover{background:rgba(243,231,215,.09)}
+.warm-actions button:focus-visible,#light-toggle:focus-visible,textarea:focus-visible{outline:2px solid #efc48d;outline-offset:4px}
+.warm-actions button:disabled{opacity:.5;cursor:wait}
+.warm-status{min-height:1.5em;font:300 12px/1.5 var(--sans);color:var(--cream);margin:18px 0 0}
+.message-label,.copy-fallback label{display:block;text-align:left;font:400 10px/1.5 var(--sans);letter-spacing:.06em;margin:30px auto 10px;max-width:550px}
+.reminder-wrap textarea{display:block;resize:vertical;width:100%;max-width:550px;margin:0 auto 24px;padding:18px;background:rgba(25,18,15,.12);border:1px solid var(--line);border-radius:3px;color:var(--cream);font:300 18px/1.5 var(--serif)}
+.copy-fallback[hidden],#project-player[hidden]{display:none}
+#project-player{margin:30px auto;max-width:520px}
+#project-audio{display:block;width:100%;margin-bottom:16px}
+body.has-project-audio .song{display:block!important}
+.ambient-orb{filter:brightness(var(--music-brightness,1));transition:filter 1.2s ease}
+@media(max-width:700px){.choir-feature{grid-template-columns:1fr;gap:28px}.choir-portrait{max-width:none}.choir-bio p{font-size:17px}.choir-bio h4{max-width:none}.warm-actions{gap:9px}.warm-actions button{padding:12px 15px}}
+@media(prefers-reduced-motion:reduce){.ambient-orb{filter:none!important;transition:none}}
